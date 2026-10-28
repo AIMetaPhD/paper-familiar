@@ -1,0 +1,9 @@
+We consider a set of edge nodes that serve requests from a shared cache.
+Each request has a context that may already be present on some nodes.
+Serving a request at a node without the context requires either recomputation or a transfer.
+The operator chooses an admission rule and a placement rule jointly.
+We write the optimization problem as a minimization of expected tail latency subject to an uplink budget.
+The decision variables are the admission threshold and the set of cache-bearing nodes.
+The problem is non-convex because the tail latency depends on the maximum over requests.
+We therefore restrict attention to threshold policies and optimize within that class.
+This restriction is explicit: our results do not apply to arbitrary scheduling policies.

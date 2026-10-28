@@ -1,0 +1,203 @@
+{
+  "paper_root": ".tmpdata\\pcpaper",
+  "files": {
+    "tex": [
+      "main.tex",
+      "sections/eval.tex",
+      "sections/intro.tex",
+      "sections/method.tex"
+    ],
+    "bib": [
+      "refs.bib"
+    ],
+    "sty": [],
+    "cls": [],
+    "figures": []
+  },
+  "main_candidates": [
+    {
+      "file": "main.tex",
+      "score": 13,
+      "reasons": [
+        "has \\documentclass",
+        "has \\begin{document}"
+      ]
+    },
+    {
+      "file": "sections/eval.tex",
+      "score": 0,
+      "reasons": []
+    },
+    {
+      "file": "sections/intro.tex",
+      "score": 0,
+      "reasons": []
+    },
+    {
+      "file": "sections/method.tex",
+      "score": 0,
+      "reasons": []
+    }
+  ],
+  "include_graph": [
+    {
+      "from": "main.tex",
+      "includes": "sections/intro.tex"
+    },
+    {
+      "from": "main.tex",
+      "includes": "sections/method.tex"
+    },
+    {
+      "from": "main.tex",
+      "includes": "sections/eval.tex"
+    }
+  ],
+  "sections": [
+    {
+      "level": "section",
+      "title": "Introduction",
+      "file": "main.tex",
+      "line": 20
+    },
+    {
+      "level": "section",
+      "title": "Method",
+      "file": "main.tex",
+      "line": 24
+    },
+    {
+      "level": "section",
+      "title": "Evaluation",
+      "file": "main.tex",
+      "line": 28
+    },
+    {
+      "level": "section",
+      "title": "Conclusion",
+      "file": "main.tex",
+      "line": 35
+    }
+  ],
+  "theorem_envs": [],
+  "theorem_env_names": [
+    "assumption",
+    "corollary",
+    "definition",
+    "lemma",
+    "proposition",
+    "remark",
+    "theorem"
+  ],
+  "labels": [
+    {
+      "label": "sec:intro",
+      "file": "main.tex",
+      "line": 21
+    },
+    {
+      "label": "sec:method",
+      "file": "main.tex",
+      "line": 25
+    },
+    {
+      "label": "sec:eval",
+      "file": "main.tex",
+      "line": 29
+    },
+    {
+      "label": "sec:conclusion",
+      "file": "main.tex",
+      "line": 36
+    },
+    {
+      "label": "eq:admit",
+      "file": "sections/method.tex",
+      "line": 4
+    },
+    {
+      "label": "sec:method",
+      "file": "sections/method.tex",
+      "line": 8
+    }
+  ],
+  "duplicate_labels": [
+    "sec:method"
+  ],
+  "refs": [
+    {
+      "kind": "ref",
+      "target": "fig:nonexistent",
+      "file": "main.tex",
+      "line": 32
+    }
+  ],
+  "unresolved_refs": [
+    "fig:nonexistent"
+  ],
+  "citations": [
+    {
+      "key": "missing2026",
+      "file": "main.tex",
+      "line": 32
+    },
+    {
+      "key": "vaswani2017",
+      "file": "main.tex",
+      "line": 33
+    },
+    {
+      "key": "vaswani2017",
+      "file": "sections/eval.tex",
+      "line": 4
+    }
+  ],
+  "bib_keys": [
+    "vaswani2017",
+    "broken2021"
+  ],
+  "unresolved_citations": [
+    "missing2026"
+  ],
+  "unused_bib_keys": [
+    "broken2021"
+  ],
+  "equations": [
+    {
+      "label": "eq:admit",
+      "env": "equation",
+      "file": "sections/method.tex",
+      "line_start": 3,
+      "line_end": 6
+    }
+  ],
+  "draft_markers": [],
+  "suppressed_draft_markers": [],
+  "claim_triggers": [
+    {
+      "word": "first",
+      "file": "sections/eval.tex",
+      "line": 2
+    },
+    {
+      "word": "first",
+      "file": "sections/eval.tex",
+      "line": 2
+    },
+    {
+      "word": "prove",
+      "file": "sections/eval.tex",
+      "line": 4
+    },
+    {
+      "word": "optimal",
+      "file": "sections/intro.tex",
+      "line": 11
+    },
+    {
+      "word": "first",
+      "file": "sections/method.tex",
+      "line": 14
+    }
+  ]
+}

@@ -1,0 +1,201 @@
+{
+  "generated_at": "2026-10-28T11:55:33.673181+00:00",
+  "python": "3.13.9 | packaged by Anaconda, Inc. | (main, Oct 21 2025, 19:09:58) [MSC v.1929 64 bit (AMD64)]",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "machine": "AMD64",
+  "packages": {
+    "papercheck": {
+      "installed": true,
+      "version": "0.3.4",
+      "license": "MIT",
+      "requires_python": ">=3.10",
+      "requires": [
+        "jsonschema>=4.0",
+        "mcp>=1.0",
+        "pylatexenc>=2.10",
+        "pytest>=8; extra == 'dev'",
+        "pyyaml>=6.0",
+        "ruff>=0.6; extra == 'dev'",
+        "typer>=0.12"
+      ],
+      "files_top_level": [
+        "..",
+        "papercheck",
+        "papercheck-0.3.4.dist-info"
+      ],
+      "smoke": {
+        "ok": true,
+        "module_file": "E:\\ClaudeCodeFiles\\MyProducts\\PaperFamiliar\\paper-familiar\\.venv\\Lib\\site-packages\\papercheck\\__init__.py",
+        "public_names": []
+      }
+    },
+    "academic-refchecker": {
+      "installed": true,
+      "version": "3.1.11",
+      "license": "",
+      "requires_python": ">=3.11",
+      "requires": [
+        "Pillow>=12.2.0; extra == \"webui\"",
+        "aiosqlite>=0.22.1; extra == \"webui\"",
+        "anthropic>=0.97.0; extra == \"llm\"",
+        "arxiv>=3.0.0",
+        "beautifulsoup4>=4.14.3",
+        "black>=26.3.1; extra == \"dev\"",
+        "colorama>=0.4.6",
+        "cryptography>=47.0.0; extra == \"webui\"",
+        "fastapi>=0.136.1; extra == \"webui\"",
+        "flake8>=7.3.0; extra == \"dev\"",
+        "fuzzywuzzy>=0.18.0",
+        "google-genai>=1.73.1; extra == \"llm\"",
+        "httpx>=0.28.1; extra == \"webui\"",
+        "huggingface_hub>=1.12.0; extra == \"vllm\"",
+        "isort>=8.0.1; extra == \"dev\"",
+        "itsdangerous>=2.2.0; extra == \"webui\"",
+        "joblib>=1.5.3; extra == \"optional\"",
+        "lxml>=6.1.0; extra == \"optional\"",
+        "mypy>=1.20.2; extra == \"dev\"",
+        "nltk>=3.9.4; extra == \"optional\"",
+        "numpy>=2.4.4",
+        "openai>=2.33.0; extra == \"llm\"",
+        "pandas>=3.0.2",
+        "pdfplumber>=0.11.9",
+        "pikepdf>=10.5.1; extra == \"optional\"",
+        "pybtex>=0.26.1",
+        "pydantic>=2.13.3; extra == \"webui\"",
+        "pymupdf>=1.27.2.3; extra == \"webui\"",
+        "pypdf>=6.10.2",
+        "pytest-cov>=7.1.0; extra == \"dev\"",
+        "pytest>=9.0.3; extra == \"dev\"",
+        "python-Levenshtein>=0.27.3",
+        "python-dateutil>=2.9.0.post0",
+        "python-jose[cryptography]>=3.5.0",
+        "python-multipart>=0.0.27; extra == \"webui\"",
+        "requests>=2.33.1",
+        "scikit-learn>=1.8.0; extra == \"optional\"",
+        "selenium>=4.43.0; extra == \"optional\"",
+        "sphinx-rtd-theme>=3.1.0; extra == \"docs\"",
+        "sphinx>=9.0.4; extra == \"docs\"",
+        "torch>=2.11.0; extra == \"vllm\"",
+        "tqdm>=4.67.3",
+        "uvicorn[standard]>=0.46.0; extra == \"webui\"",
+        "vllm>=0.20.0; extra == \"vllm\""
+      ],
+      "files_top_level": [
+        "..",
+        "academic_refchecker-3.1.11.dist-info",
+        "backend",
+        "refchecker"
+      ],
+      "smoke": {
+        "ok": true,
+        "module": "refchecker",
+        "module_file": "E:\\ClaudeCodeFiles\\MyProducts\\PaperFamiliar\\paper-familiar\\.venv\\Lib\\site-packages\\refchecker\\__init__.py",
+        "public_names": [
+          "ArxivReferenceChecker",
+          "checkers",
+          "config",
+          "core",
+          "database",
+          "llm",
+          "services",
+          "utils"
+        ]
+      }
+    },
+    "pylatexenc": {
+      "installed": true,
+      "version": "2.11",
+      "license": "MIT",
+      "requires_python": null,
+      "requires": [],
+      "files_top_level": [
+        "..",
+        "pylatexenc",
+        "pylatexenc-2.11.dist-info"
+      ],
+      "smoke": {
+        "ok": true,
+        "parsed_nodes": 3,
+        "first_node": "LatexCharsNode"
+      }
+    },
+    "bibtexparser": {
+      "installed": true,
+      "version": "2.1.0",
+      "license": "",
+      "requires_python": ">=3.10",
+      "requires": [
+        "jupyter; extra == \"test\"",
+        "pylatexenc~=2.10",
+        "pytest-cov; extra == \"test\"",
+        "pytest-xdist; extra == \"test\"",
+        "pytest; extra == \"test\"",
+        "sphinx; extra == \"docs\""
+      ],
+      "files_top_level": [
+        "bibtexparser",
+        "bibtexparser-2.1.0.dist-info"
+      ],
+      "smoke": {
+        "ok": true,
+        "entries": [
+          {
+            "key": "k",
+            "type": "article"
+          }
+        ]
+      }
+    },
+    "pystylometry": {
+      "installed": true,
+      "version": "1.4.3",
+      "license": "MIT",
+      "requires_python": ">=3.9,<4.0",
+      "requires": [
+        "bnc-lookup (>=1.4.3) ; extra == \"lexical\" or extra == \"all\"",
+        "gngram-lookup (>=0.2.5) ; extra == \"lexical\" or extra == \"all\"",
+        "matplotlib (>=3.8.0,<4.0.0) ; extra == \"viz\" or extra == \"all\"",
+        "openpyxl (>=3.1.0,<4.0.0) ; extra == \"lexical\" or extra == \"excel\" or extra == \"all\"",
+        "pronouncing (>=0.2.0,<0.3.0) ; extra == \"readability\" or extra == \"all\"",
+        "rich (>=13.0,<14.0)",
+        "seaborn (>=0.13.0,<0.14.0) ; extra == \"viz\" or extra == \"all\"",
+        "spacy (>=3.8.0,<4.0.0) ; extra == \"readability\" or extra == \"syntactic\" or extra == \"all\"",
+        "wordnet-lookup (>=1.2.4) ; extra == \"lexical\" or extra == \"all\""
+      ],
+      "files_top_level": [
+        "..",
+        "pystylometry",
+        "pystylometry-1.4.3.dist-info"
+      ],
+      "smoke": {
+        "ok": true,
+        "module_file": "E:\\ClaudeCodeFiles\\MyProducts\\PaperFamiliar\\paper-familiar\\.venv\\Lib\\site-packages\\pystylometry\\__init__.py",
+        "public_names": [
+          "AnalysisResult",
+          "TokenMetadata",
+          "TokenizationStats",
+          "Tokenizer",
+          "analyze",
+          "authorship",
+          "consistency",
+          "dialect",
+          "get_available_modules",
+          "lexical",
+          "ngrams",
+          "stylistic",
+          "syntactic",
+          "tokenize",
+          "tokenize_with_metadata",
+          "tokenizer"
+        ]
+      }
+    },
+    "faststylometry": {
+      "installed": false,
+      "smoke": {
+        "ok": false,
+        "error": "not installed"
+      }
+    }
+  }
+}

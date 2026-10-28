@@ -1,0 +1,61 @@
+\documentclass[conference]{IEEEtran}
+\usepackage{amsmath,amssymb}
+\title{Joint Scheduling and Placement for Collaborative Edge Inference}
+\author{Author A}
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Collaborative edge inference couples request scheduling with model placement.
+We show that solving the two problems separately can trap the system in a placement that is optimal for the current load but poor for the next burst.
+We propose a joint controller that re-places models only when the scheduling objective improves by a margin that covers migration cost.
+Experiments show a 17\% throughput gain over decoupled baselines under bursty arrivals.
+\end{abstract}
+
+\section{Introduction}
+\label{sec:intro}
+Edge clusters host many small models whose popularity shifts over time.
+Placement determines which nodes can serve a request without a wide-area hop.
+Scheduling determines which replica receives the request.
+Most systems fix placement on a slow timescale and schedule on a fast timescale.
+This separation is convenient, but it ignores the feedback from scheduling to placement.
+We therefore formulate a joint objective and solve it with a two-level controller.
+
+\section{Related Work}
+\label{sec:related}
+Placement has been studied as a bin-packing problem with latency constraints.
+Scheduling has been studied as a queueing problem with heterogeneous service rates.
+Joint formulations are common in cloud settings but rare at the edge, where migration is expensive and capacity is small.
+Our work quantifies when joint optimization pays for its migration cost.
+
+\section{Problem Formulation}
+\label{sec:problem}
+Let $p_{mk} \in \{0,1\}$ indicate that model $m$ is placed on node $k$, and let $z_{im} \in \{0,1\}$ indicate that request $i$ is served by model $m$.
+The objective combines served requests and migration cost:
+\begin{equation}
+\label{eq:joint}
+\max \sum_i z_i - \gamma \sum_{m,k} \lvert p_{mk} - p'_{mk} \rvert,
+\end{equation}
+where $p'$ is the previous placement and $\gamma$ trades throughput against churn.
+
+\section{Method}
+\label{sec:method}
+We alternate between scheduling and placement until the objective stops improving.
+A change in placement is committed only if the predicted gain exceeds $\gamma$ times the number of moved models.
+This acceptance rule prevents thrashing under noisy demand estimates.
+We prove monotonic improvement of the alternation and bound the number of re-placements per epoch.
+
+\section{Evaluation}
+\label{sec:eval}
+We replay a trace of model popularity from a production-like workload.
+The joint controller improves throughput by 17\% over a decoupled baseline.
+Under bursty arrivals, the gain rises to 24\%; under stationary arrivals, it falls to 6\%.
+Moreover, the acceptance rule cuts re-placements by half without reducing throughput.
+
+\section{Conclusion}
+\label{sec:conclusion}
+Joint scheduling and placement is worthwhile when demand is bursty and migration is cheap.
+The proposed acceptance rule captures this trade-off with a single margin.
+Future work will study online estimation of $\gamma$.
+
+\end{document}

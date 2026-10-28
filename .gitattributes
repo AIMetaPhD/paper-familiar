@@ -1,0 +1,5 @@
+* text=auto
+fixtures/** -text
+demo/** -text
+*.png binary
+*.zip binary

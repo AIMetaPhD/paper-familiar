@@ -1,0 +1,51 @@
+{
+  "description": "ADV-05 fixtures. Every finding here must be rejected by the quote gate before appearing in the user ledger.",
+  "target_file": "sections/eval.tex",
+  "findings": [
+    {
+      "id": "F-FAKE-001",
+      "kind": "fabricated_quote",
+      "file_path": "sections/eval.tex",
+      "start_line": 1,
+      "start_col": 1,
+      "end_line": 1,
+      "end_col": 40,
+      "exact_quote": "The reuse-aware rule reduces transfer volume by 40% relative to every baseline.",
+      "reason": "quote does not occur in the file; only the phrase with 12% exists"
+    },
+    {
+      "id": "F-FAKE-002",
+      "kind": "line_shift",
+      "file_path": "sections/eval.tex",
+      "start_line": 99,
+      "start_col": 1,
+      "end_line": 99,
+      "end_col": 20,
+      "exact_quote": "Tail latency improves",
+      "reason": "quote exists but not at the claimed location"
+    },
+    {
+      "id": "F-FAKE-003",
+      "kind": "hash_mismatch",
+      "file_path": "sections/eval.tex",
+      "file_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "start_line": 2,
+      "start_col": 1,
+      "end_line": 2,
+      "end_col": 30,
+      "exact_quote": "The reuse-aware rule reduces",
+      "reason": "source hash does not match the immutable manuscript"
+    },
+    {
+      "id": "F-FAKE-004",
+      "kind": "normalized_only",
+      "file_path": "sections/eval.tex",
+      "start_line": 2,
+      "start_col": 1,
+      "end_line": 2,
+      "end_col": 30,
+      "exact_quote": "The reuse aware rule reduces transfer volume by 12% relative to a first come first served baseline.",
+      "reason": "matches only after aggressive normalization; must not count as byte-exact"
+    }
+  ]
+}

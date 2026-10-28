@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "paperfamiliar"
+version = "0.1.0"
+description = "Local-first, evidence-backed LaTeX manuscript verification with author style and cognitive fingerprints."
+readme = "README.md"
+requires-python = ">=3.11,<3.14"
+license = {text = "MIT"}
+authors = [{name = "Xiangchun Chen"}]
+dependencies = [
+  "fastapi>=0.115,<1",
+  "uvicorn>=0.30,<1",
+  "pydantic>=2.9,<3",
+  "python-multipart>=0.0.9",
+]
+
+[project.optional-dependencies]
+latex = ["pylatexenc>=2.10,<3", "bibtexparser>=2.0,<3"]
+integrations = ["papercheck==0.3.4", "academic-refchecker==3.1.11"]
+style-research = ["pystylometry==1.4.3"]
+dev = ["pytest>=8", "httpx>=0.27", "jsonschema>=4.22"]
+
+[project.scripts]
+paperfamiliar = "paperfamiliar.cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+paperfamiliar = ["web/dist/**/*", "demo/**/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

@@ -1,0 +1,19 @@
+{
+  "schema_version": "1.1",
+  "gate": "G1",
+  "commit_sha": "REPLACE_WITH_REAL_40_HEX_COMMIT_SHA",
+  "run_id": "REPLACE_WITH_REAL_RUN_ID",
+  "created_at": "REPLACE_WITH_UTC_ISO_DATETIME",
+  "status": "MUSE_UNAVAILABLE",
+  "tester_identity": "NOT_CONNECTED",
+  "tester_origin": "independent_muse",
+  "independent_run_proof_path": "REPLACE_WITH_REAL_TRANSPORT_LOG",
+  "environment_fingerprint": "REPLACE_WITH_PLATFORM_FINGERPRINT",
+  "tested_platforms": [],
+  "executed_commands": [],
+  "checks": [{"id":"OFF-01","status":"UNTESTED","expected":"Offline demo works","observed":"NOT RUN","evidence_paths":[]}],
+  "failed_gates": ["NOT_RUN"],
+  "evidence_paths": [],
+  "network_isolation_proof": "REPLACE_WITH_FILE_PATH",
+  "report_path": "REPLACE_WITH_MUSE_REPORT_PATH"
+}

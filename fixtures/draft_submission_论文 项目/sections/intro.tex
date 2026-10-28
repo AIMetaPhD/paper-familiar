@@ -1,0 +1,11 @@
+Distributed inference at the edge is constrained by uplink bandwidth.
+Requests that share a context can reuse key-value cache, which reduces both computation and transfer.
+However, reuse couples request placement: a request that arrives at a node without the cache either rebuilds it or fetches it.
+We study admission control when reuse is possible but not guaranteed.
+Our working hypothesis is that a modest reservation for cache-bearing nodes improves tail latency without stranding capacity.
+This hypothesis matters because operators already reserve capacity for warm caches, but they do so with fixed thresholds.
+A fixed threshold cannot react to changes in request mix or to congestion on the uplink.
+We therefore derive a threshold from observed reuse and transfer cost rather than from a static policy.
+The resulting rule is simple enough to deploy and explicit enough to audit.
+We evaluate it on a synthetic trace and report the conditions under which it helps.
+We do not claim that the rule is optimal, and we identify the cases where it is not.

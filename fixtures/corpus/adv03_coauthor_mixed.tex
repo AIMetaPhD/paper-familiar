@@ -1,0 +1,52 @@
+\documentclass[conference]{IEEEtran}
+\usepackage{amsmath}
+\title{Collaborative Inference with Adaptive Compression}
+\author{Author A and Author C}
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We study adaptive compression for collaborative inference. Compression reduces transfer cost but perturbs model outputs. We propose a controller that selects a compression level per request. Experiments show a 14\% reduction in transfer volume with negligible accuracy loss.
+\end{abstract}
+
+% contribution: sole_or_primary
+\section{Introduction}
+\label{sec:intro}
+Collaborative inference moves activations and cache between nodes.
+The transfer volume grows with model width and context length.
+Compression is an obvious remedy, but the right compression level depends on the request.
+We propose a per-request controller that balances transfer cost against output perturbation.
+Our contributions are a perturbation model, a controller, and an evaluation on two workloads.
+
+% contribution: coauthored
+\section{Compression Background}
+Compression operators include quantization, low-rank projection, and sparsification. Quantization maps floating point tensors to lower precision. Low-rank projection factorizes weight matrices. Sparsification removes small activations. Each operator has a different error profile, and the profiles interact when operators are composed. Prior systems choose a fixed operator per layer, which ignores request-level variation. We describe the operators here to fix notation; the design of the controller is given in the next section.
+
+% contribution: not_primary
+\section{Implementation Details}
+The prototype is written in Rust and uses a custom ring buffer for activation staging. The ring buffer avoids copies between the network stack and the compute kernel. We use io\_uring on Linux and overlapped I/O on Windows. The scheduler runs on a dedicated core. Profiling shows that the ring buffer accounts for most of the throughput improvement, while the compression controller accounts for most of the transfer reduction. The implementation is available from the authors on request.
+
+% contribution: sole_or_primary
+\section{Controller Design}
+\label{sec:method}
+Let $\ell$ denote the compression level and let $e(\ell)$ denote the measured output perturbation.
+The controller chooses $\ell$ to minimize transfer cost plus a penalty $\mu e(\ell)$.
+The penalty is calibrated per workload from a small validation set.
+In particular, the controller reacts to link congestion by raising $\ell$ only when the perturbation budget is not exhausted.
+This rule prevents compression from degrading accuracy during congestion.
+
+% contribution: sole_or_primary
+\section{Evaluation}
+\label{sec:eval}
+We evaluate on image classification and language modeling.
+Transfer volume falls by 14\% with a top-1 accuracy change of 0.2 percentage points.
+The controller reacts within one request under synthetic congestion.
+Moreover, the penalty calibration transfers across the two workloads with minor adjustment.
+
+\section{Conclusion}
+\label{sec:conclusion}
+Adaptive compression is effective when the perturbation budget is explicit.
+The controller is simple and reacts quickly to congestion.
+Future work will study multi-tenant settings.
+
+\end{document}

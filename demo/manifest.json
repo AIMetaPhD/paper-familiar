@@ -1,0 +1,16 @@
+{
+  "name": "PaperFamiliar offline demo",
+  "draft": "draft",
+  "draft_assume_primary": true,
+  "history": [
+    {"path": "history/a1_distributed_inference_2022.tex", "contribution": "sole_or_primary", "year": 2022, "paper_type": "optimization", "venue": "synthetic"},
+    {"path": "history/a2_kv_cache_2023.tex", "contribution": "sole_or_primary", "year": 2023, "paper_type": "systems", "venue": "synthetic"},
+    {"path": "history/a3_edge_scheduling_2024.tex", "contribution": "sole_or_primary", "year": 2024, "paper_type": "optimization", "venue": "synthetic"},
+    {"path": "history/a4_latency_modeling_2025.tex", "contribution": "sole_or_primary", "year": 2025, "paper_type": "modeling", "venue": "synthetic"}
+  ],
+  "assumptions": [
+    "Every manuscript in this demo is synthetic and was written for testing; no real paper is included.",
+    "Demo-only: the synthetic draft is treated as the author's own prose so that style cards can be shown. In a real workspace the default label is 'unknown' and unknown sections are excluded.",
+    "The demo contains deliberate errors: an undefined citation, a duplicate label, an undefined reference, a misattributed real citation, and prompt-injection text in a comment."
+  ]
+}

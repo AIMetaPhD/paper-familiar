@@ -1,0 +1,17 @@
+We define a reuse score $q_i$ for request $i$ as the fraction of its context already present in cache.
+The admission rule accepts a request when
+\begin{equation}
+\label{eq:admit}
+q_i \cdot r - c_i \ge \theta,
+\end{equation}
+where $r$ is the estimated recomputation cost, $c_i$ is the transfer cost, and $\theta$ is a threshold.
+\label{sec:method}
+A fixed margin $\Delta_{\mathrm{eff}}$ separates the two regimes.
+The threshold is updated every epoch from observed tail latency.
+A higher threshold admits fewer reuse requests, which protects the uplink at the cost of computation.
+A lower threshold admits more reuse requests, which saves computation when the cache is warm.
+The update uses a small step size so that the rule does not oscillate under bursty arrivals.
+We initialize the threshold from the first epoch and let it adapt from there.
+The rule never overrides the hard capacity limit of a node.
+We do not yet model cache eviction, which we treat as future work.
+We also leave multi-hop transfer out of scope, because it changes the cost model substantially.

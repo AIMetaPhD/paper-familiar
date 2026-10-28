@@ -1,0 +1,26 @@
+{
+  "fetched_at_epoch": 1793189544.44399,
+  "consumers": [
+    {
+      "identity": "muse-1",
+      "first_seen": 1792296382.1036968,
+      "last_authenticated": 1793189458.7510698,
+      "last_poll": 1793189458.7510698,
+      "poll_count": 7433
+    },
+    {
+      "identity": "muse-2",
+      "first_seen": 1792296424.9154093,
+      "last_authenticated": 1793189457.510511,
+      "last_poll": 1793189457.510511,
+      "poll_count": 7439
+    },
+    {
+      "identity": "muse-3",
+      "first_seen": 1792315874.7348301,
+      "last_authenticated": 1793189458.7784605,
+      "last_poll": 1793189458.7784605,
+      "poll_count": 8037
+    }
+  ]
+}

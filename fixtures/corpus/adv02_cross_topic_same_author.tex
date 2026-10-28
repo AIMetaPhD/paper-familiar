@@ -1,0 +1,58 @@
+\documentclass[conference]{IEEEtran}
+\usepackage{amsmath,amssymb}
+\title{Uncertainty-Aware Scheduling for Clinical Decision Support}
+\author{Author A}
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Clinical decision support systems must schedule inference under uncertain patient arrival and uncertain model calibration.
+We formulate the scheduling problem with a calibration-aware objective and propose a policy that reserves capacity for high-uncertainty cases.
+On a retrospective dataset, the policy improves the fraction of high-uncertainty cases served within the clinical deadline by 19\%.
+\end{abstract}
+
+\section{Introduction}
+\label{sec:intro}
+Hospitals increasingly rely on models that flag deterioration risk.
+These models are calibrated on historical cohorts and drift when case mix changes.
+A scheduler that ignores calibration drift may allocate capacity to cases the model already handles well.
+We therefore treat calibration uncertainty as a scheduling signal.
+Our contributions are a calibration-aware objective, a reservation policy, and a retrospective evaluation.
+
+\section{Related Work}
+\label{sec:related}
+Prior work on clinical scheduling optimizes waiting time and utilization.
+Prior work on calibration studies reliability diagrams and recalibration methods.
+The two literatures rarely meet, although both concern uncertainty.
+Our formulation connects them through a per-case uncertainty score.
+
+\section{Problem Formulation}
+\label{sec:problem}
+Let $u_i$ denote the uncertainty score of case $i$ and let $d_i$ denote its deadline.
+The scheduler chooses a service order to maximize the number of high-uncertainty cases completed before $d_i$, subject to capacity $C$.
+We write the objective as
+\begin{equation}
+\label{eq:clinical}
+\max \sum_i \mathbf{1}[u_i \ge u_0] \, \mathbf{1}[T_i \le d_i].
+\end{equation}
+
+\section{Method}
+\label{sec:method}
+We reserve a fraction $\beta$ of capacity for cases with $u_i \ge u_0$ and serve the remainder in deadline order.
+The reservation fraction is adjusted weekly from observed calibration error.
+In particular, the adjustment uses only aggregate error, so it does not require patient-level labels at deployment.
+
+\section{Evaluation}
+\label{sec:eval}
+We replay a retrospective cohort of 12{,}000 cases.
+The reservation policy improves on-time service for high-uncertainty cases by 19\%.
+Overall utilization drops by 3\%, which the clinical team considered acceptable.
+A sensitivity study shows that the gain persists when the uncertainty threshold varies by 20\%.
+
+\section{Conclusion}
+\label{sec:conclusion}
+Calibration uncertainty is a useful scheduling signal.
+A simple reservation policy captures most of the benefit.
+Future work will evaluate the policy prospectively and study fairness across demographic groups.
+
+\end{document}

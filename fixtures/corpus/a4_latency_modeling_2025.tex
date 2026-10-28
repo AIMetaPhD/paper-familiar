@@ -1,0 +1,56 @@
+\documentclass[conference]{IEEEtran}
+\usepackage{amsmath,amssymb}
+\title{A Queueing View of Tail Latency in Collaborative Inference}
+\author{Author A}
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Tail latency in collaborative inference arises from the interaction of queueing, model placement, and cache transfer.
+We derive a decomposition that separates the contribution of each stage and validate it on a four-node testbed.
+The decomposition explains why adding replicas can increase the 99th percentile when cache transfer saturates the uplink.
+\end{abstract}
+
+\section{Introduction}
+\label{sec:intro}
+Operators often add replicas to reduce tail latency.
+In collaborative inference, a new replica also creates new opportunities for cache transfer.
+When the uplink is shared, additional replicas can therefore make the tail worse.
+We provide a simple decomposition that predicts when this reversal occurs.
+The decomposition requires only per-stage service distributions and the transfer volume per request.
+
+\section{Related Work}
+\label{sec:related}
+Tail-latency studies in datacenters attribute variance to queueing and to background traffic.
+Edge studies additionally attribute variance to model heterogeneity and to intermittent connectivity.
+Our decomposition combines these factors in a single expression and isolates the transfer term.
+
+\section{Problem Formulation}
+\label{sec:problem}
+Let $T = T_q + T_s + T_m$ be the request latency, where $T_q$ is queueing delay, $T_s$ is service time, and $T_m$ is migration delay.
+Assuming independence across stages, the tail of $T$ is bounded by the sum of stage tails.
+The assumption fails when migration and service share the uplink, which we model with a coupling term $\rho$.
+
+\section{Method}
+\label{sec:method}
+We estimate each stage distribution from traces and compute the coupled tail bound
+\begin{equation}
+\label{eq:bound}
+\mathbb{P}(T > t) \le \sum_{k} \mathbb{P}(T_k > t/3) + \rho(t).
+\end{equation}
+The coupling term is estimated from concurrent transfer and request traffic.
+When $\rho$ grows faster than the queueing term shrinks, adding a replica increases the tail.
+
+\section{Evaluation}
+\label{sec:eval}
+On a four-node testbed, the bound tracks the measured 99th percentile within 12\%.
+Adding a fifth replica reduces the median but increases the 99th percentile by 8\%, as the decomposition predicts.
+In particular, the reversal disappears when migration is rate-limited to 20\% of the uplink.
+
+\section{Conclusion}
+\label{sec:conclusion}
+Tail latency in collaborative inference cannot be reasoned about one stage at a time.
+The proposed decomposition identifies when replication backfires.
+Future work will extend it to multi-tenant clusters.
+
+\end{document}

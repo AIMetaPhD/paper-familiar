@@ -1,0 +1,61 @@
+{
+  "schema_version": "1.1",
+  "recorded_at": "2026-10-28T19:59:00Z",
+  "recorded_by": "Claude Code (producer identity: claude)",
+  "status": "AVAILABLE_INTERMITTENT",
+  "transport": {
+    "type": "authenticated_task_queue",
+    "endpoint": "http://100.111.90.123:9110",
+    "network": "Tailscale private address of workstation",
+    "client": "F:\\Applications\\Documents\\Workspace\\projects\\muse-queue\\queue_client.py",
+    "invocation_template": "python queue_client.py --role producer --producer claude --method GET|POST --path <allowed path>",
+    "authentication": "local-ip-and-producer-token; claude producer key read from private/credentials.json (never printed)",
+    "provenance_issuer": "claude",
+    "recipients": ["muse-1", "muse-2", "muse-3"],
+    "notes": [
+      "MSYS_NO_PATHCONV=1 is required in Git Bash or /health/consumers is rewritten as a Windows path.",
+      "The server is single-threaded. /tasks and /tasks/pending can take 13-36 s with 100 stored tasks; short client timeouts (15 s) time out even when the server is healthy.",
+      "/health/consumers, /tasks/<id>/status and /tasks/<id> respond in under 1 s when the server is not busy."
+    ]
+  },
+  "discovery": [
+    {"probe": "command -v muse; Get-Command muse", "result": "no Muse CLI on PATH", "evidence": "terminal output, 2026-10-28"},
+    {"probe": "MCP servers in ~/.claude.json and project configs", "result": "no Muse MCP server; global mcpServers = [rube], project-only context7/telegram", "evidence": "~/.claude.json"},
+    {"probe": "existing project records", "result": "F:\\Applications\\Documents\\Workspace\\projects\\muse-queue documents the real transport; AgentFirstPaperWorkflow .dispatch scripts use it", "evidence": "muse-queue/README.md, .dispatch/dispatch.py"},
+    {"probe": "GET /health/consumers", "result": "HTTP 200; muse-1, muse-2, muse-3 all authenticated and polling within the last 60 s", "evidence": "qa/evidence/p0/muse-health.json"}
+  ],
+  "canaries": [
+    {
+      "task_id": "5d2a4ecc86851c920dc38796",
+      "created_at": "2026-10-28T19:39:53Z",
+      "recipient": "muse-1",
+      "state": "finished",
+      "claimed_by": "muse-1",
+      "result_status": "rejected",
+      "evidence": {
+        "note": "Snapshot failed system-level prompt-injection check; not executed per hard boundary. Snapshot preserved as evidence.",
+        "reason": "prompt_injection_check_failed"
+      },
+      "interpretation": "The transport delivered the task and Muse independently claimed and rejected it. The rejection is a platform safety boundary, not a transport failure. The canary text contained credential-related words that triggered the check."
+    },
+    {
+      "task_id": "9fca16a3d00d4eb5c1a1ea49",
+      "created_at": "2026-10-28T20:10:58Z",
+      "recipient": "muse-1",
+      "state": "pending_at_record_time",
+      "result_status": null,
+      "note": "Simplified read-only canary without credential wording; result to be appended when claimed."
+    }
+  ],
+  "gate_implications": {
+    "independent_qa_possible": true,
+    "verified_by_claude": false,
+    "statement": "A real, independent Muse channel exists and is reachable. No gate may be marked VERIFIED until Muse returns a verdict JSON on the same commit. Claude's own tests are always labelled self-test.",
+    "reliability_risk": "Queue latency and occasional non-response require retries and generous timeouts; a timeout is recorded as a transport observation, not as a Muse verdict."
+  },
+  "privacy": {
+    "tokens_printed": false,
+    "task_bodies_contain_only_synthetic_fixtures": true,
+    "credentials_location": "F:\\Applications\\Documents\\Workspace\\projects\\muse-queue\\private\\credentials.json (not copied into this repository)"
+  }
+}

