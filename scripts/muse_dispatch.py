@@ -34,10 +34,12 @@ execution on the exact commit named below; the implementer's self-test files
 under qa/evidence are reference material, not your evidence.
 
 Repository location: the workstation you already SSH into with your normal
-account, path:
+account to run queue_client.py — the same host and account, path:
     {repo}
-If that path is not reachable for you, record every affected check as BLOCKED
-with the exact reason; do not substitute guesses.
+Use that existing SSH session for all file access (git, venv creation, test
+runs, writing your two output files). If the path or session is genuinely
+unreachable for you, record every affected check as BLOCKED with the exact
+reason; do not substitute guesses.
 
 Commit under test:
     {sha}
@@ -71,12 +73,17 @@ What to do:
 6. Write a human report at qa/muse-report-{gate}.md (commands, environments,
    findings, reproduction of any failure).
 7. Do NOT run git commit or git push; the implementer integrates and commits
-   evidence after reviewing it. Then return your queue result with
-   status=success/failure and evidence {{"gate": "{gate}", "verdict_file":
-   "qa/muse-verdict-{gate}.json", "summary": "..."}}.
+   evidence after reviewing it. Return your queue result with
+   status=success/failure and evidence {{"gate": "{gate}", "summary": "..."}}.
+   Additionally, paste the FULL verdict JSON (the same content you wrote to
+   qa/muse-verdict-{gate}.json, minified) into a second queue task reply only
+   if you could not write files; then set evidence.verdict_in_result=true and
+   include its sha256 so the implementer can persist and verify it byte-exact.
 
 Hard rules:
-- Do not modify product source code, fixtures, demo, or the handoff file.
+- You may write ONLY qa/muse-verdict-{gate}.json and qa/muse-report-{gate}.md
+  plus new files under qa/evidence/{gate}/muse/. Do not modify product source
+  code, fixtures, demo, or the handoff file.
 - Never run a TeX engine on any file; the product must not either.
 - Missing platform, engine, or permission => BLOCKED with reason, not guessed.
 - Your verdict must come from what YOU executed. Never copy wording or numbers
@@ -128,7 +135,7 @@ def main() -> int:
                 "verdict_schema": "schemas/qa-verdict.schema.json",
                 "run_id": handoff["run_id"],
             },
-            "permissions": "read_only",
+            "permissions": "approval_required",
         }
         encoded = json.dumps(body, ensure_ascii=False).encode("utf-8")
         result = queue_call("POST", "/tasks", encoded)
