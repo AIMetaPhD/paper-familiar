@@ -123,5 +123,11 @@
       "claimed_by": "muse-1",
       "result": null
     }
-  ]
+  ],
+  "routing_after_round1": {
+    "muse-2": "not routable for this repository in round 2: muse-2 executes on a remote Linux VM with no path to the workstation repo and no fetchable public artifact exists yet (repo archive is ~1.05 MB gzip > queue body limit). Excluding it is an honesty record, not a substitute for its QA.",
+    "muse-1": "accepted the corrected contract already (G1 in flight); receives G2 re-dispatch.",
+    "muse-3": "round-1 decline cited (a) read_only vs required-writes contradiction [fixed cdc3910] and (b) its own owner-relay permission rule. One retry with corrected dispatch; if it declines again its gates move to muse-1's queue and this file records it.",
+    "final_run_note": "check_gates.py requires one final SHA for all five handoffs; these round-2 handoffs pin per-gate SHAs. Before asking for push authorization, all selftests are re-run and all five handoffs rebuilt on the same final commit."
+  }
 }

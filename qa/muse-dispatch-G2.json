@@ -2,11 +2,11 @@
   "gate": "G2",
   "commit_sha": "494eaefbde3f6a5e950515bac10e3aff5903ce21",
   "handoff_run_id": "640c1eb30e02",
-  "dispatched_at": "2026-10-28T17:36:29.938551+00:00",
+  "dispatched_at": "2026-10-28T18:18:14.013107+00:00",
   "tasks": [
     {
-      "recipient": "muse-2",
-      "task_id": "bf509c3d24a623b69baa6631",
+      "recipient": "muse-1",
+      "task_id": "e22197c45fe58b94789cc4d3",
       "state": "pending"
     }
   ],
