@@ -41,7 +41,11 @@ Handoff record with the check list, expected behavior and evidence paths:
     qa/handoff-{gate}.json
 
 What to do:
-1. Verify HEAD equals the commit above (git rev-parse HEAD).
+1. Verify the product under test. The commit above must exist, and the product
+   code must be unchanged up to HEAD: run
+       git cat-file -e {sha} && git diff {sha} HEAD -- src web fixtures demo
+   the diff must be empty (only qa/ evidence and docs may differ after it).
+   Check out {sha} (detached) for the actual testing if you want strictness.
 2. Create a fresh virtualenv outside the repository, install the project from
    source (pip install -e . or build a wheel and install it), and follow the
    reproduce commands in each check of the handoff file.

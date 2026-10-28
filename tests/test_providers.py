@@ -146,10 +146,15 @@ def test_api_key_is_not_in_the_preview(monkeypatch, server):
 def test_core_product_is_complete_without_any_model(tmp_path, monkeypatch):
     """AI-01 fallback: with no local model and no cloud config, the full golden
     path (demo -> audit -> decision -> style -> navigator -> export) works and
-    the UI is told the model is unavailable rather than silently broken."""
+    the UI is told the model is unavailable rather than silently broken.
+
+    The endpoint is pointed at a closed port so the test never touches a real
+    local Ollama that happens to be running on the test machine.
+    """
+    monkeypatch.setenv("PAPERFAMILIAR_OLLAMA_URL", "http://127.0.0.1:9/v1")
     monkeypatch.setattr(providers, "probe_local",
                         lambda timeout=0.8: {"status": "unavailable", "models": [],
-                                             "endpoint": "http://127.0.0.1:1",
+                                             "endpoint": "http://127.0.0.1:9",
                                              "detail": "UnitTest"})
     from fastapi.testclient import TestClient
 
