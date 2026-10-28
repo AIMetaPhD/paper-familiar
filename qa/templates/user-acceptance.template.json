@@ -1,0 +1,9 @@
+{
+  "schema_version": "1.2",
+  "commit_sha": "REPLACE_WITH_THE_40_HEX_SHA_YOU_TESTED",
+  "decision": "PENDING",
+  "approved_at": "REPLACE_WITH_UTC_ISO_DATETIME_WHEN_YOU_DECIDE",
+  "blind_test_evidence_path": "qa/evidence/G5/user/",
+  "user_confirmation": "This is a template, not a signature. Only the product owner may change decision to APPROVED and write a real confirmation sentence here.",
+  "public_release_authorized": false
+}

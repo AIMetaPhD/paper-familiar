@@ -1,0 +1,54 @@
+name: build-and-smoke
+
+# OPS-COMPAT: OS matrix smoke for the local web app. This proves packaging and
+# boot health on ubuntu/windows/macOS runners; it does NOT replace a real-user
+# browser session and the README states exactly what is and is not covered.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  matrix-smoke:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python: ["3.11", "3.13"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Build wheel
+        run: |
+          python -m pip install --upgrade pip build
+          python -m build --wheel
+
+      - name: Install wheel in a clean venv
+        run: |
+          python -m venv .testenv
+          .testenv/scripts/pip install --no-build-isolation dist/*.whl || .testenv/Scripts/pip install --no-build-isolation dist/*.whl
+        shell: bash
+
+      - name: Boot server and probe health + demo (loopback only)
+        run: python scripts/ci_smoke.py
+        shell: bash
+
+      - name: Unit tests (browser E2E excluded)
+        run: |
+          .testenv/scripts/pip install "pytest>=8" "httpx>=0.27" jsonschema || .testenv/Scripts/pip install "pytest>=8" "httpx>=0.27" jsonschema
+          .testenv/scripts/python -m pytest -q --ignore=tests/e2e || .testenv/Scripts/python -m pytest -q --ignore=tests/e2e
+        shell: bash
+
+      - name: Upload failure artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-${{ matrix.os }}-${{ matrix.python }}
+          path: qa/ci-smoke/
