@@ -1,0 +1,195 @@
+{
+  "schema_version": "1.2",
+  "gate": "G3",
+  "commit_sha": "d01b27fb5f4082a5cc5516f3fbbc077e47799e74",
+  "run_id": "94b0fa62afda",
+  "created_at": "2026-10-28T17:24:41.017182+00:00",
+  "status": "SUBMITTED",
+  "environment_fingerprint": "Windows-11-AMD64-py3.13.9",
+  "tested_platforms": [
+    "windows11_x64"
+  ],
+  "browsers_tested": [
+    "chromium",
+    "firefox",
+    "webkit"
+  ],
+  "executed_commands": [
+    {
+      "command": "E:\\ClaudeCodeFiles\\MyProducts\\PaperFamiliar\\paper-familiar\\.venv\\Scripts\\python.exe -m pytest -q tests/test_style.py::test_same_topic_different_author_does_not_look_identical",
+      "exit_code": 0,
+      "platform": "windows11_x64",
+      "log_path": "qa/evidence/G3/host-local/adv-01-94b0fa62afda.log"
+    },
+    {
+      "command": "E:\\ClaudeCodeFiles\\MyProducts\\PaperFamiliar\\paper-familiar\\.venv\\Scripts\\python.exe -m pytest -q tests/test_style.py::test_baseline_uses_function_words_not_topic_terms",
+      "exit_code": 0,
+      "platform": "windows11_x64",
+      "log_path": "qa/evidence/G3/host-local/adv-02-94b0fa62afda.log"
+    },
+    {
+      "command": "E:\\ClaudeCodeFiles\\MyProducts\\PaperFamiliar\\paper-familiar\\.venv\\Scripts\\python.exe -m pytest -q tests/test_style.py::test_coauthor_sections_are_excluded_from_the_profile",
+      "exit_code": 0,
+      "platform": "windows11_x64",
+      "log_path": "qa/evidence/G3/host-local/adv-03-94b0fa62afda.log"
+    },
+    {
+      "command": "E:\\ClaudeCodeFiles\\MyProducts\\PaperFamiliar\\paper-familiar\\.venv\\Scripts\\python.exe -m pytest -q tests/test_style.py::test_coauthor_sections_are_excluded_from_the_profile tests/test_rules.py::test_draft_has_the_intended_defects",
+      "exit_code": 0,
+      "platform": "windows11_x64",
+      "log_path": "qa/evidence/G3/host-local/style-01-94b0fa62afda.log"
+    },
+    {
+      "command": "E:\\ClaudeCodeFiles\\MyProducts\\PaperFamiliar\\paper-familiar\\.venv\\Scripts\\python.exe -m pytest -q tests/test_style.py::test_small_sample_abstains_instead_of_scoring tests/test_api.py::test_path_workspace_and_reference_flow",
+      "exit_code": 0,
+      "platform": "windows11_x64",
+      "log_path": "qa/evidence/G3/host-local/style-02-94b0fa62afda.log"
+    },
+    {
+      "command": "E:\\ClaudeCodeFiles\\MyProducts\\PaperFamiliar\\paper-familiar\\.venv\\Scripts\\python.exe -m pytest -q tests/test_navigator.py tests/e2e/test_browser.py::test_accept_dismiss_and_navigator",
+      "exit_code": 0,
+      "platform": "windows11_x64",
+      "log_path": "qa/evidence/G3/host-local/fam-01-94b0fa62afda.log"
+    },
+    {
+      "command": "E:\\ClaudeCodeFiles\\MyProducts\\PaperFamiliar\\paper-familiar\\.venv\\Scripts\\python.exe -m pytest -q tests/test_navigator.py",
+      "exit_code": 0,
+      "platform": "windows11_x64",
+      "log_path": "qa/evidence/G3/host-local/fam-02-94b0fa62afda.log"
+    },
+    {
+      "command": "E:\\ClaudeCodeFiles\\MyProducts\\PaperFamiliar\\paper-familiar\\.venv\\Scripts\\python.exe -m pytest -q tests/e2e/test_browser.py::test_refresh_restores_workspace",
+      "exit_code": 0,
+      "platform": "windows11_x64",
+      "log_path": "qa/evidence/G3/host-local/style-card-94b0fa62afda.log"
+    }
+  ],
+  "checks": [
+    {
+      "id": "ADV-01",
+      "status": "PASS",
+      "expected": "Same-topic different-author hard negatives not mistaken for matching voice",
+      "observed": "pytest: exit 0 on Windows AMD64",
+      "platforms_tested": [
+        "windows11_x64"
+      ],
+      "browsers_tested": [],
+      "evidence_paths": [
+        "qa/evidence/G3/host-local/adv-01-94b0fa62afda.log"
+      ]
+    },
+    {
+      "id": "ADV-02",
+      "status": "PASS",
+      "expected": "Same-author cross-topic does not flag jargon as writing-style error",
+      "observed": "pytest: exit 0 on Windows AMD64",
+      "platforms_tested": [
+        "windows11_x64"
+      ],
+      "browsers_tested": [],
+      "evidence_paths": [
+        "qa/evidence/G3/host-local/adv-02-94b0fa62afda.log"
+      ]
+    },
+    {
+      "id": "ADV-03",
+      "status": "PASS",
+      "expected": "Coauthor/unknown sections excluded from author-approved profile",
+      "observed": "pytest: exit 0 on Windows AMD64",
+      "platforms_tested": [
+        "windows11_x64"
+      ],
+      "browsers_tested": [],
+      "evidence_paths": [
+        "qa/evidence/G3/host-local/adv-03-94b0fa62afda.log"
+      ]
+    },
+    {
+      "id": "STYLE-01",
+      "status": "PASS",
+      "expected": "Detex removes math, algorithm, table macro noise and preserves grounded prose",
+      "observed": "pytest: exit 0 on Windows AMD64",
+      "platforms_tested": [
+        "windows11_x64"
+      ],
+      "browsers_tested": [],
+      "evidence_paths": [
+        "qa/evidence/G3/host-local/style-01-94b0fa62afda.log"
+      ]
+    },
+    {
+      "id": "STYLE-02",
+      "status": "PASS",
+      "expected": "Insufficient approved papers -> honest abstention; no 0-100 index",
+      "observed": "pytest: exit 0 on Windows AMD64",
+      "platforms_tested": [
+        "windows11_x64"
+      ],
+      "browsers_tested": [],
+      "evidence_paths": [
+        "qa/evidence/G3/host-local/style-02-94b0fa62afda.log"
+      ]
+    },
+    {
+      "id": "FAM-01",
+      "status": "PASS",
+      "expected": "No-model Paper Map finds problem/formulation; unknown -> not_found not hallucinated",
+      "observed": "pytest: exit 0 on Windows AMD64",
+      "platforms_tested": [
+        "windows11_x64"
+      ],
+      "browsers_tested": [
+        "chromium",
+        "firefox",
+        "webkit"
+      ],
+      "evidence_paths": [
+        "qa/evidence/G3/host-local/fam-01-94b0fa62afda.log"
+      ]
+    },
+    {
+      "id": "FAM-02",
+      "status": "PASS",
+      "expected": "Section tree and def/theorem/algorithm order explainable with source references",
+      "observed": "pytest: exit 0 on Windows AMD64",
+      "platforms_tested": [
+        "windows11_x64"
+      ],
+      "browsers_tested": [],
+      "evidence_paths": [
+        "qa/evidence/G3/host-local/fam-02-94b0fa62afda.log"
+      ]
+    },
+    {
+      "id": "STYLE-CARD",
+      "status": "PASS",
+      "expected": "Drift Cards include approved history examples or source spans, no forced rewrite",
+      "observed": "pytest: exit 0 on Windows AMD64",
+      "platforms_tested": [
+        "windows11_x64"
+      ],
+      "browsers_tested": [
+        "chromium",
+        "firefox",
+        "webkit"
+      ],
+      "evidence_paths": [
+        "qa/evidence/G3/host-local/style-card-94b0fa62afda.log"
+      ]
+    }
+  ],
+  "failed_gates": [],
+  "evidence_paths": [
+    "qa/evidence/G3/host-local/adv-01-94b0fa62afda.log",
+    "qa/evidence/G3/host-local/adv-02-94b0fa62afda.log",
+    "qa/evidence/G3/host-local/adv-03-94b0fa62afda.log",
+    "qa/evidence/G3/host-local/fam-01-94b0fa62afda.log",
+    "qa/evidence/G3/host-local/fam-02-94b0fa62afda.log",
+    "qa/evidence/G3/host-local/handoff-context-94b0fa62afda.log",
+    "qa/evidence/G3/host-local/style-01-94b0fa62afda.log",
+    "qa/evidence/G3/host-local/style-02-94b0fa62afda.log",
+    "qa/evidence/G3/host-local/style-card-94b0fa62afda.log",
+    "qa/evidence/offline-proof.log"
+  ],
+  "network_isolation_proof": "qa/evidence/offline-proof.log"
+}
