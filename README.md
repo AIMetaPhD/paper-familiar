@@ -23,8 +23,8 @@ author's own blind sign-off are still outstanding. Nothing is published anywhere
 | Item | State |
 |---|---|
 | Local server + browser UI, offline demo, upload, persistence, exports | working, self-tested |
-| Unit tests (parser, rules, quote gate, security, style, navigator, providers) | 51 passing on this machine |
-| Playwright E2E on Chromium / Firefox / WebKit | passing on this machine (one host) |
+| Unit tests (parser, rules, quote gate, security, style, navigator, providers, offline proof) | 56 passing on this machine |
+| Playwright E2E on Chromium / Firefox / WebKit | 36 passing on this machine (one host) |
 | Wheel packaging (`web/dist` + demo inside the wheel) | verified; clean-venv install check pending |
 | Independent Muse QA (G1–G5) | transport verified working; verdicts pending |
 | Author blind evaluation (G5, `USER-01`) | reserved for you |
