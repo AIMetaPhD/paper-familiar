@@ -1,52 +1,75 @@
-# P0 Platform Risk Assessment
+# P0 Platform & Compatibility Risk (v1.2 Local-first Web App)
 
-- Date: 2026-10-28
-- Scope: Windows 11 x64 (primary, present) and macOS Apple Silicon arm64 (primary, **not reachable from this session**)
-- Evidence: commands below were run in this session; machine fingerprint recorded in `qa/muse-transport.json` and `docs/dependency-audit.md`.
+- Date: 2026-10-28 (rewritten for the v1.2 architecture; supersedes the v1.1
+  two-native-client framing)
+- Execution host for all evidence in this repo: **Windows 11 x64 (real machine)**
+- Browser engines executed for E2E: **Chromium, Firefox, WebKit** via Playwright
+  on that host.
 
-## 1. Machines actually available
+## 1. What v1.2 requires vs what was measured
 
-| Platform | Present | Fingerprint | Consequence |
-|---|---|---|---|
-| Windows 11 x64 | yes | Windows 11 Pro 10.0.26200 build 26200, Intel i5-12600KF (10C/16T), 31.8 GB RAM, 64-bit | all Windows evidence can be produced locally |
-| macOS Apple Silicon arm64 | no | `ssh 100.113.5.29` failed with `Permission denied (publickey,password,keyboard-interactive)`; no SSH host alias or key configured | macOS G1/G5 evidence is `BLOCKED_PLATFORM_UNTESTED` until the user runs the acceptance script on the Mac or grants key-based SSH |
-
-The MacBook is online in Tailscale (`macbook 100.113.5.29`), but this session has no credential. This is a hard blocker for macOS acceptance, not a reason to lower the gate.
-
-## 2. Windows 11 toolchain
-
-| Component | Observed | Risk / decision |
+| Contract | Requirement | Actual status |
 |---|---|---|
-| Python | 3.13.9 (Anaconda, `F:\Applications\Anaconda\python.exe`), pip 25.3 | Locked as build interpreter. `papercheck 0.3.4` only classifies 3.10–3.12, so its adapter is capability-probed and optional. Final user install should use a dedicated 3.12/3.13 venv, not Anaconda base. |
-| venv | created at `.venv` (Python 3.13.9) | Works; no admin rights needed |
-| uv | not installed | Not required; launcher uses `python -m venv`. If added later, it must not become mandatory. |
-| Node.js | 24.12.0, npm 11.6.2 | Development-only. Built assets are committed; end users do not need Node. |
-| Git | 2.55.0.windows.4 | available; repository is local only |
-| GitHub CLI | 2.89.0 | authenticated state is not inspected or printed; no push in P0 |
-| TeX | TeX Live 2025 on PATH | **Not used**: v0.1 never compiles user source |
-| Ollama | 0.32.14 installed, service not running | Local model path is optional; absence must degrade cleanly |
-| Browsers | Chrome and Edge installed | Both need a smoke test; Safari is macOS-only |
-| Port 8420 | free at time of check | Launcher must detect conflicts and exit non-zero with a clear message |
-| Long paths | `LongPathsEnabled = 0` | Keep generated paths short; do not depend on >260 char paths. Test spaces and Unicode, not extreme depth. |
-| Display | not yet measured; 125%/150% DPI must be tested in G1 | UI must use scalable layout, no fixed pixel assumptions |
+| One local Python service + one browser UI | real host, full golden path | PASS on Windows 11 x64 (self-test; Muse pending) |
+| Three browser engines | Playwright chromium/firefox/webkit | PASS on Windows 11 x64; Safari-on-macOS itself untested |
+| macOS / Linux hosts | honest README matrix, CI smoke recommended | **UNTESTED_PLATFORM** — no host has run the suite |
+| Wheel contains prebuilt frontend + demo | zip inspection | PASS (38 entries incl. `web/dist` and demo) |
+| No Node/Electron/Docker at runtime | import & process inspection | PASS |
+| Strict offline | socket-level guard test + runtime probes | PASS on this host |
 
-## 3. macOS Apple Silicon risks (unverified here)
+macOS note: the user's Apple Silicon machine exists on the network but this
+session has no SSH credential; per v1.2 that is a README honesty item
+(`UNTESTED_PLATFORM`), not a release blocker. If you want real-Mac evidence
+later, run the repo's `tests/e2e` there or grant access.
 
-- Native `arm64` wheels are required for any compiled dependency (`lxml`, `cryptography`, `python-Levenshtein`). The wheelhouse audit (`pip download --platform macosx_11_0_arm64`) records whether each pinned version publishes one.
-- Gatekeeper may quarantine downloaded launchers; the supported path is a checked-out repository plus `python3 -m venv`, not a signed .app in v0.1.
-- Rosetta must not be used. The acceptance script must assert `uname -m == arm64` and `platform.machine() == arm64`.
-- Unicode normalization (NFC/NFD) differs from Windows; paths with Chinese characters must be tested on the Mac.
-- Safari is the second browser and must be smoke-tested; Chromium-only testing is insufficient.
+## 2. Python toolchain (measured on this host)
 
-## 4. Offline install risk
+| Component | Observed | Decision |
+|---|---|---|
+| Python | 3.13.9 (Anaconda base) | `pyproject` pins `>=3.11,<3.14`; venv per project |
+| uv | absent | Not required; README documents the venv+pip path; `uv run` mentioned as alternative only |
+| Node.js | 24.12.0 / npm 11.6.2 | build-time only, frontend rebuild |
+| Git | 2.55 | local repository only; no remote operations |
+| TeX Live 2025 present | — | deliberately unused: v0.1 never compiles user source |
+| Ollama 0.32.14 installed, service stopped | probe → `unavailable` | exactly the fallback path the UI must show |
+| Port 8420 | free at check time | busy-port precheck + clear exit code 7 (tested) |
+| Windows LongPaths | disabled | product paths are kept short; deep archives are rejected by policy anyway |
 
-- First install requires network to populate the wheel cache. Acceptance runs must then work with `pip install --no-index --find-links wheelhouse`.
-- `academic-refchecker` pulls `pdfminer.six`, `pdfplumber`, `cryptography`, `pybtex`, `lxml`, `python-Levenshtein`. That is a large surface for a metadata-only feature. It is optional at runtime; failure degrades to `unavailable`.
-- A clean-machine README must state the real prerequisite (Python 3.11+), because v0.1 does not ship a signed standalone installer.
+## 3. Dependency / packaging risks
+
+1. Optional integrations (`papercheck`, `academic-refchecker`) are not runtime
+   dependencies; refchecker's transitive GPL packages are excluded (see
+   dependency-audit §3). Wheel install must therefore work with the five runtime
+   deps only. **Verified**: wheel installs and serves with `--no-deps` over a
+   base env that already has FastAPI/uvicorn/pydantic.
+2. macOS/Linux wheels: proven *downloadable* for the full optional set
+   (`pip download --platform macosx_11_0_arm64` exit 0, native arm64 wheels for
+   cffi/cryptography/numpy/pandas/pydantic-core/…); runtime behavior on those
+   OS is UNTESTED, as stated.
+3. FastAPI 0.162 pulls Starlette 1.10; behavior verified locally for
+   middleware, UploadFile and StaticFiles. A downgrade pin is possible if a
+   future minor breaks the loopback guard pattern — guard is plain middleware
+   over `request.headers`, which is stable API.
+4. Playwright webkit on Windows ships its own browser binaries; user machines do
+   NOT need Safari/WebKit installed — E2E is a developer/CI concern only.
+
+## 4. Runtime behavior risks
+
+- Single-threaded SQLite access from uvicorn workers: safe today because we run
+  one process with `check_same_thread=False` + WAL + short transactions. A
+  `--workers` flag would need per-process connections; deliberately not offered.
+- Loopback-only Host allowlist blocks DNS-rebinding (tested) but means users
+  behind unusual local proxies get a clear 400, not a silent bypass.
+- Browser download of exports uses the same session token page context; no
+  credentials involved.
+- Windows Defender/SmartScreen may flag a first-run python.exe listening on a
+  port: documented; we do not tamper with either.
 
 ## 5. Decisions
 
-1. The Windows machine is the only source of native evidence in this session. macOS remains blocked until the user provides access or runs the script.
-2. Python is locked per-venv, not global. `pyproject.toml` requires `>=3.11,<3.14`.
-3. The launcher scripts must work without admin rights, without Node, without Docker, and with spaces/Chinese characters in the project path.
-4. Cross-platform binary availability is proven by `pip download --platform ... --only-binary=:all:` evidence, not by assumption.
+1. All acceptance evidence in this repo is stamped with the *actual* host:
+   `windows11_x64` + which engine ran. Nothing is pre-filled for other hosts.
+2. CI OS matrix smoke (install wheel → `paperfamiliar serve` → `/api/health`)
+   is the recommended future expansion; it is not present yet and the README
+   says so.
+3. Python 3.11–3.13 supported; 3.13.9 is the version actually exercised.

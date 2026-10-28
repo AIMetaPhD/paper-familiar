@@ -1,17 +1,28 @@
 {
-  "schema_version": "1.1",
+  "schema_version": "1.2",
   "gate": "G1",
   "commit_sha": "REPLACE_WITH_REAL_40_HEX_COMMIT_SHA",
   "run_id": "REPLACE_WITH_REAL_RUN_ID",
   "created_at": "REPLACE_WITH_UTC_ISO_DATETIME",
   "status": "SUBMITTED",
-  "environment_fingerprint": "REPLACE_WITH_PLATFORM_FINGERPRINT",
+  "environment_fingerprint": "REPLACE_WITH_REAL_HOST_BROWSER_FINGERPRINT",
   "tested_platforms": [],
   "executed_commands": [],
   "checks": [
-    {"id": "OFF-01", "status": "UNTESTED", "expected": "Offline demo works natively on both OS", "observed": "NOT RUN", "platforms_tested": [], "evidence_paths": []}
+    {
+      "id": "OFF-01",
+      "status": "UNTESTED",
+      "expected": "Installed local Python service and browser complete offline Demo -> Audit -> Jump -> Export without external network calls",
+      "observed": "NOT RUN",
+      "platforms_tested": [],
+      "evidence_paths": [],
+      "browsers_tested": []
+    }
   ],
-  "failed_gates": ["NOT_RUN"],
+  "failed_gates": [
+    "NOT_RUN"
+  ],
   "evidence_paths": [],
-  "network_isolation_proof": "REPLACE_WITH_FILE_PATH"
+  "network_isolation_proof": "REPLACE_WITH_FILE_PATH",
+  "browsers_tested": []
 }

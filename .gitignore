@@ -1,5 +1,10 @@
 .venv/
 .tmpdata*/
+.g1-data-*/
+dist/
+build/
+*.egg-info/
+
 wheelhouse/
 __pycache__/
 *.py[cod]

@@ -1,0 +1,18 @@
+{
+  "task_id": "7a9e65ac0e16ed8911461827",
+  "state": "finished",
+  "claimed_by": "muse-1",
+  "result": {
+    "evidence": {
+      "ack": "PF-ACK-20261028",
+      "agent": "muse-1"
+    },
+    "status": "success"
+  },
+  "provenance": {
+    "issuer": "claude",
+    "authentication": "local-ip-and-producer-token",
+    "version": 1,
+    "key_id": "claude-producer-v1"
+  }
+}

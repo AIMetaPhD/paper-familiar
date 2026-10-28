@@ -2,7 +2,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = ROOT / "fixtures"
-DEMO = ROOT / "demo"
+DEMO = ROOT / "src" / "paperfamiliar" / "demo"
 
 
 def _tree(root: Path) -> dict[str, bytes]:

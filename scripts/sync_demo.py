@@ -12,7 +12,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 CORPUS = ROOT / "fixtures" / "corpus"
 DRAFT = ROOT / "fixtures" / "draft_submission_论文 项目"
-DEMO = ROOT / "demo"
+DEMO = ROOT / "src" / "paperfamiliar" / "demo"
 
 HISTORY = [
     "a1_distributed_inference_2022.tex",
@@ -29,6 +29,10 @@ def main() -> int:
     shutil.copytree(DRAFT, DEMO / "draft")
     for name in HISTORY:
         shutil.copy2(CORPUS / name, DEMO / "history" / name)
+    # remove the stale top-level copy from the v1.1 layout
+    stale = ROOT / "demo"
+    if stale.exists():
+        shutil.rmtree(stale)
     print(f"demo synced: {DEMO}")
     return 0
 

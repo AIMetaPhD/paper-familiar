@@ -1,6 +1,9 @@
 # ADR-0001: Single-process FastAPI + prebuilt React/Vite + SQLite
 
-- Status: accepted
+- Status: accepted, **partially superseded by ADR-0007 (v1.2 Local-first Web
+  App)** — the stack decision stands; the native per-OS launcher scripts and
+  the two-OS native-client acceptance framing were dropped. `paperfamiliar
+  serve` is now the single entry point on every OS.
 - Date: 2026-10-28
 
 ## Context

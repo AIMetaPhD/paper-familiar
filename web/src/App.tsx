@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ReactElement } from "react";
 import { api } from "./api";
+import ModelsPanel from "./ModelsPanel";
 import type {
   DriftCard,
   Finding,
@@ -8,6 +9,7 @@ import type {
   RunSummary,
   SectionMeta,
   SourceSpan,
+  WorkspaceRow,
 } from "./types";
 
 const STATUS_TEXT: Record<string, string> = {
@@ -27,6 +29,15 @@ const DECISION_TEXT: Record<string, string> = {
   needs_review: "Marked for review",
 };
 
+const CONTRIBUTION_OPTIONS: [string, string][] = [
+  ["sole_or_primary", "I wrote it"],
+  ["coauthored", "Coauthored"],
+  ["not_primary", "Not mine"],
+  ["unknown", "Unknown"],
+];
+
+const LAST_WORKSPACE_KEY = "paperfamiliar.workspace";
+
 function StatusChip({ status }: { status: string }) {
   return (
     <span className={`chip chip-${status}`} title={STATUS_TEXT[status] ?? status}>
@@ -37,6 +48,12 @@ function StatusChip({ status }: { status: string }) {
 
 function shortSha(sha: string) {
   return sha.slice(0, 10);
+}
+
+function formatBytes(n: number) {
+  if (n < 1024) return `${n} B`;
+  if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
+  return `${(n / 1024 / 1024).toFixed(1)} MB`;
 }
 
 interface Mark {
@@ -93,6 +110,24 @@ function roleLabel(role: string) {
   return role === "related_work" ? "related work" : role.replace("_", " ");
 }
 
+function ContributionSelect({
+  value,
+  onChange,
+  ariaLabel,
+}: {
+  value: string;
+  onChange: (next: string) => void;
+  ariaLabel: string;
+}) {
+  return (
+    <select aria-label={ariaLabel} value={value} onChange={(event) => onChange(event.target.value)}>
+      {CONTRIBUTION_OPTIONS.map(([code, text]) => (
+        <option key={code} value={code}>{text}</option>
+      ))}
+    </select>
+  );
+}
+
 function SectionTree({
   sections,
   onSelect,
@@ -114,16 +149,11 @@ function SectionTree({
             <span>
               {section.sentence_count} sent · {section.word_count} words
             </span>
-            <select
-              aria-label={`Contribution label for ${section.title}`}
+            <ContributionSelect
+              ariaLabel={`Contribution label for ${section.title}`}
               value={section.contribution}
-              onChange={(event) => onLabel(section, event.target.value)}
-            >
-              <option value="sole_or_primary">I wrote it</option>
-              <option value="coauthored">Coauthored</option>
-              <option value="not_primary">Not mine</option>
-              <option value="unknown">Unknown</option>
-            </select>
+              onChange={(next) => onLabel(section, next)}
+            />
           </div>
         </li>
       ))}
@@ -227,6 +257,322 @@ function DriftCardView({ card }: { card: DriftCard }) {
   );
 }
 
+type ImportKind = "manuscript" | "reference";
+
+function ImportModal({
+  presetKind,
+  onClose,
+  onManuscript,
+  onReference,
+  setError,
+}: {
+  presetKind: ImportKind;
+  onClose: () => void;
+  onManuscript: (summary: RunSummary) => void;
+  onReference: (workspaceId: string, label: string) => void;
+  setError: (message: string | null) => void;
+}) {
+  const [kind, setKind] = useState<ImportKind>(presetKind);
+  const [files, setFiles] = useState<File[] | null>(null);
+  const [label, setLabel] = useState("");
+  const [path, setPath] = useState("");
+  const [busy, setBusy] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const folderRef = useRef<HTMLInputElement>(null);
+
+  async function uploadSelected() {
+    if (!files || files.length === 0) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const result = await api.upload(Array.from(files), label || null, kind);
+      if ("kind" in result && "sections" in result) {
+        onReference(result.workspace_id, result.label);
+      } else {
+        onManuscript(result as RunSummary);
+      }
+      onClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function openPath() {
+    if (!path.trim()) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const result = await api.openPath(path.trim(), label || null, kind);
+      if ("kind" in result && "sections" in result) {
+        onReference(result.workspace_id, result.label);
+      } else {
+        onManuscript(result as RunSummary);
+      }
+      onClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const showDrop = kind === "manuscript" || kind === "reference";
+
+  return (
+    <div className="modal-backdrop" onClick={onClose}>
+      <div className="modal wide" onClick={(event) => event.stopPropagation()}>
+        <h2>{kind === "reference" ? "Add reference papers (your own earlier work)" : "Open a paper"}</h2>
+        <div className="segmented">
+          <button className={kind === "manuscript" ? "active" : ""} onClick={() => setKind("manuscript")}>
+            Paper to audit
+          </button>
+          <button className={kind === "reference" ? "active" : ""} onClick={() => setKind("reference")}>
+            My earlier papers
+          </button>
+        </div>
+        {kind === "reference" && (
+          <p>
+            Reference papers build your style baseline. Nothing is compared unless you mark
+            sections as your own primary writing.
+          </p>
+        )}
+
+        {showDrop && (
+          <div
+            className="drop-zone"
+            onDragOver={(event) => event.preventDefault()}
+            onDrop={(event) => {
+              event.preventDefault();
+              if (event.dataTransfer.files.length) setFiles(Array.from(event.dataTransfer.files));
+            }}
+          >
+            <p>
+              {files
+                ? `${files.length} file(s) selected (${formatBytes(files.reduce((a, f) => a + f.size, 0))})`
+                : "Drop .tex / .bib files, a .zip, or choose below"}
+            </p>
+            <div className="drop-actions">
+              <button onClick={() => fileRef.current?.click()}>Choose files</button>
+              <button onClick={() => folderRef.current?.click()}>Choose folder</button>
+            </div>
+            <input
+              ref={fileRef}
+              type="file"
+              multiple
+              accept=".tex,.bib,.zip"
+              hidden
+              onChange={(event) => setFiles(event.target.files ? Array.from(event.target.files) : null)}
+            />
+            <input
+              ref={folderRef}
+              type="file"
+              hidden
+              onChange={(event) => setFiles(event.target.files ? Array.from(event.target.files) : null)}
+              {...({ webkitdirectory: "", directory: "" } as Record<string, string>)}
+            />
+          </div>
+        )}
+
+        <label className="wide-label">
+          Label (optional)
+          <input value={label} onChange={(event) => setLabel(event.target.value)} placeholder="e.g. ICASSP 2026 submission" />
+        </label>
+
+        <div className="modal-actions">
+          <button className="ghost" onClick={onClose}>Cancel</button>
+          <button className="primary" onClick={uploadSelected} disabled={busy || !files?.length}>
+            {kind === "reference" ? "Add as reference" : "Audit this paper"}
+          </button>
+        </div>
+
+        {kind === "manuscript" && (
+          <>
+            <h3 className="section-heading">…or a folder already on this machine</h3>
+            <p className="hint">
+              The server reads it in place and never writes to it. Only .tex/.bib/.zip under the
+              given path are visible.
+            </p>
+            <div className="nav-row">
+              <input
+                value={path}
+                placeholder="E:/papers/my_submission or …/paper.zip"
+                onChange={(event) => setPath(event.target.value)}
+                onKeyDown={(event) => event.key === "Enter" && openPath()}
+              />
+              <button onClick={openPath} disabled={busy || !path.trim()}>Open</button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ReferenceModal({
+  workspaceId,
+  onClose,
+  setError,
+}: {
+  workspaceId: string;
+  onClose: () => void;
+  setError: (message: string | null) => void;
+}) {
+  const [sections, setSections] = useState<SectionMeta[] | null>(null);
+  const [label, setLabel] = useState("");
+
+  useEffect(() => {
+    api.workspace(workspaceId)
+      .then((summary) => {
+        setSections(summary.sections);
+        setLabel(summary.label);
+      })
+      .catch((err: Error) => setError(err.message));
+  }, [workspaceId, setError]);
+
+  async function relabel(section: SectionMeta, contribution: string) {
+    try {
+      await api.label(workspaceId, section.id, contribution);
+      setSections((prev) => prev?.map((s) => (s.id === section.id ? { ...s, contribution } : s)) ?? null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    }
+  }
+
+  return (
+    <div className="modal-backdrop" onClick={onClose}>
+      <div className="modal wide" onClick={(event) => event.stopPropagation()}>
+        <h2>Mark your own writing — {label || "reference paper"}</h2>
+        <p>
+          Only sections you mark <em>“I wrote it”</em> enter your style baseline. Unknown and
+          coauthored sections are excluded by default.
+        </p>
+        {!sections && <p className="busy">Loading sections…</p>}
+        <ul className="ref-sections">
+          {(sections ?? []).map((section) => (
+            <li key={section.id}>
+              <span>{section.title}</span>
+              <span className="muted small">{section.sentence_count} sentences</span>
+              <ContributionSelect
+                ariaLabel={`Contribution for ${section.title}`}
+                value={section.contribution}
+                onChange={(next) => relabel(section, next)}
+              />
+            </li>
+          ))}
+        </ul>
+        <div className="modal-actions">
+          <button className="primary" onClick={onClose}>Done</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SettingsModal({
+  onClose,
+  onChanged,
+  setError,
+}: {
+  onClose: () => void;
+  onChanged: (remaining: WorkspaceRow[]) => void;
+  setError: (message: string | null) => void;
+}) {
+  const [settings, setSettings] = useState<Awaited<ReturnType<typeof api.settings>> | null>(null);
+  const [rows, setRows] = useState<WorkspaceRow[]>([]);
+  const [confirmWord, setConfirmWord] = useState("");
+
+  async function reload() {
+    const [nextSettings, nextList] = await Promise.all([api.settings(), api.workspaces()]);
+    setSettings(nextSettings);
+    setRows(nextList.workspaces);
+    return nextList.workspaces;
+  }
+
+  useEffect(() => {
+    reload().catch((err: Error) => setError(err.message));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  async function removeWorkspace(row: WorkspaceRow) {
+    if (!window.confirm(`Delete “${row.label}” and its stored copies? Your original folder is never touched.`)) return;
+    try {
+      await api.deleteWorkspace(row.id);
+      if (localStorage.getItem(LAST_WORKSPACE_KEY) === row.id) localStorage.removeItem(LAST_WORKSPACE_KEY);
+      onChanged(await reload());
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    }
+  }
+
+  async function clearAll() {
+    try {
+      await api.clearAll();
+      localStorage.removeItem(LAST_WORKSPACE_KEY);
+      onChanged(await reload());
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    }
+  }
+
+  return (
+    <div className="modal-backdrop" onClick={onClose}>
+      <div className="modal wide" onClick={(event) => event.stopPropagation()}>
+        <h2>Local data</h2>
+        {!settings && <p className="busy">Loading…</p>}
+        {settings && (
+          <>
+            <p className="mono small">{settings.usage.data_dir}</p>
+            <ul className="privacy">
+              <li>{settings.usage.workspaces} workspace(s) · {settings.usage.runs} run(s)</li>
+              <li>sources {formatBytes(settings.usage.workspaces_bytes)} · exports {formatBytes(settings.usage.exports_bytes)} · cache {formatBytes(settings.usage.cache_bytes)}</li>
+              <li>local model: <strong>{settings.providers.local.status}</strong> · cloud: <strong>{settings.providers.cloud.configured ? "configured" : "not configured"}</strong></li>
+            </ul>
+            <h3 className="section-heading">Workspaces</h3>
+            <table className="ws-table">
+              <thead>
+                <tr><th>label</th><th>kind</th><th>created</th><th></th></tr>
+              </thead>
+              <tbody>
+                {rows.map((row) => (
+                  <tr key={row.id}>
+                    <td>{row.label}</td>
+                    <td>{row.kind}</td>
+                    <td className="mono small">{row.created_at.slice(0, 19)}</td>
+                    <td><button onClick={() => removeWorkspace(row)}>Delete</button></td>
+                  </tr>
+                ))}
+                {rows.length === 0 && (
+                  <tr><td colSpan={4} className="muted">Nothing stored on this machine.</td></tr>
+                )}
+              </tbody>
+            </table>
+            <h3 className="section-heading">Danger zone</h3>
+            <p className="hint">
+              Removes every workspace record, upload copy, export and cache from this machine.
+              Folders imported by path are only unlinked, never deleted.
+            </p>
+            <div className="nav-row">
+              <input
+                value={confirmWord}
+                placeholder="type DELETE to confirm"
+                onChange={(event) => setConfirmWord(event.target.value)}
+              />
+              <button className="danger" disabled={confirmWord !== "DELETE"} onClick={clearAll}>
+                Erase all local data
+              </button>
+            </div>
+          </>
+        )}
+        <div className="modal-actions">
+          <button className="primary" onClick={onClose}>Close</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   const [run, setRun] = useState<RunSummary | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -235,26 +581,52 @@ export default function App() {
   const [fileText, setFileText] = useState<string>("");
   const [fileUnchanged, setFileUnchanged] = useState<boolean>(true);
   const [activeFinding, setActiveFinding] = useState<string | null>(null);
+  const [jumpTarget, setJumpTarget] = useState<{ file: string; line: number } | null>(null);
   const [tab, setTab] = useState<"evidence" | "style" | "structure">("evidence");
   const [query, setQuery] = useState("");
   const [nav, setNav] = useState<NavigateResult | null>(null);
-  const [openPath, setOpenPath] = useState("");
-  const [showOpen, setShowOpen] = useState(false);
+  const [showImport, setShowImport] = useState<null | ImportKind>(null);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showModels, setShowModels] = useState(false);
+  const [selectedText, setSelectedText] = useState("");
+  const [manageReference, setManageReference] = useState<string | null>(null);
+  const [referenceRows, setReferenceRows] = useState<WorkspaceRow[]>([]);
   const [exportInfo, setExportInfo] = useState<{ directory: string; files: string[] } | null>(null);
   const [sourceIntact, setSourceIntact] = useState<boolean | null>(null);
-  const sourceRef = useRef<HTMLDivElement>(null);
+  const [recent, setRecent] = useState<WorkspaceRow[]>([]);
+
+  const wsId = run?.workspace_id ?? "";
+  const manuscripts = recent.filter((row) => row.kind !== "reference");
 
   useEffect(() => {
-    api.health().catch((err: Error) => setError(err.message));
+    (async () => {
+      try {
+        await api.health();
+        const list = await api.workspaces();
+        setRecent(list.workspaces);
+        const saved = localStorage.getItem(LAST_WORKSPACE_KEY);
+        if (saved) {
+          const hit = list.workspaces.find((row) => row.id === saved && row.kind !== "reference");
+          if (hit) {
+            adopt(await api.workspace(hit.id));
+            return;
+          }
+        }
+        setReferenceRows(list.workspaces.filter((row) => row.kind === "reference"));
+      } catch (err) {
+        setError(err instanceof Error ? err.message : String(err));
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const lines = useMemo(() => fileText.split(/\r\n|\n|\r/), [fileText]);
 
-  async function loadFile(runArg: RunSummary, path: string) {
+  async function loadFile(id: string, path: string) {
     setFilePath(path);
     setFileText("loading…");
     try {
-      const data = await api.file(runArg.id, path);
+      const data = await api.file(id, path);
       setFileText(data.text);
       setFileUnchanged(data.unchanged);
     } catch (err) {
@@ -263,21 +635,28 @@ export default function App() {
     }
   }
 
-  async function adoptRun(next: RunSummary) {
+  async function adopt(next: RunSummary) {
     setRun(next);
     setNav(null);
     setActiveFinding(null);
     setExportInfo(null);
     setSourceIntact(null);
     setTab("evidence");
-    await loadFile(next, next.main_path);
+    if (next.workspace_id) localStorage.setItem(LAST_WORKSPACE_KEY, next.workspace_id);
+    await loadFile(next.workspace_id ?? "", next.main_path);
+    try {
+      const settings = await api.settings();
+      setReferenceRows(settings.references);
+    } catch {
+      /* reference list is best-effort */
+    }
   }
 
   async function loadDemo() {
     setBusy("Loading the synthetic demo…");
     setError(null);
     try {
-      await adoptRun(await api.demo());
+      await adopt(await api.demo());
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {
@@ -285,13 +664,12 @@ export default function App() {
     }
   }
 
-  async function openWorkspace() {
-    if (!openPath.trim()) return;
-    setBusy("Scanning the workspace…");
+  async function reaudit() {
+    if (!wsId) return;
+    setBusy("Re-running the offline audit…");
     setError(null);
     try {
-      await adoptRun(await api.openWorkspace(openPath.trim()));
-      setShowOpen(false);
+      await adopt(await api.reaudit(wsId));
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {
@@ -301,9 +679,10 @@ export default function App() {
 
   function selectFinding(finding: Finding) {
     setActiveFinding(finding.id);
+    setJumpTarget({ file: finding.source_span.file_path, line: finding.source_span.start_line });
     setTab("evidence");
-    if (finding.source_span.file_path !== filePath && run) {
-      void loadFile(run, finding.source_span.file_path);
+    if (finding.source_span.file_path !== filePath) {
+      void loadFile(wsId, finding.source_span.file_path);
     }
   }
 
@@ -315,14 +694,19 @@ export default function App() {
     node?.scrollIntoView({ block: "center", behavior: "smooth" });
   }, [activeFinding, filePath, run]);
 
+  async function refreshStyle(ids: string[]) {
+    if (!wsId) return;
+    const next = await api.style(wsId, ids);
+    setRun(next);
+  }
+
   async function decide(finding: Finding, decision: string) {
-    if (!run) return;
     const next = decision === finding.human_decision ? "unreviewed" : decision;
     try {
-      await api.decide(run.id, finding.id, next);
+      await api.decide(wsId, finding.id, next);
       setRun({
-        ...run,
-        findings: run.findings.map((f) =>
+        ...run as RunSummary,
+        findings: (run as RunSummary).findings.map((f) =>
           f.id === finding.id ? { ...f, human_decision: next as Finding["human_decision"] } : f,
         ),
       });
@@ -332,39 +716,41 @@ export default function App() {
   }
 
   async function labelSection(section: SectionMeta, contribution: string) {
-    if (!run) return;
     try {
-      await api.label(run.id, section.id, contribution);
-      setRun({
-        ...run,
-        sections: run.sections.map((s) =>
+      await api.label(wsId, section.id, contribution);
+      const optimistic = {
+        ...run as RunSummary,
+        sections: (run as RunSummary).sections.map((s) =>
           s.id === section.id
             ? { ...s, contribution, author_approved: contribution === "sole_or_primary" }
             : s,
         ),
-      });
+      };
+      setRun(optimistic);
+      const ids = run?.style.reference_ids ?? [];
+      if (ids.length) await refreshStyle(ids);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     }
   }
 
   async function runNavigator() {
-    if (!run || !query.trim()) return;
+    if (!wsId || !query.trim()) return;
     try {
-      setNav(await api.navigate(run.id, query.trim()));
+      setNav(await api.navigate(wsId, query.trim()));
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     }
   }
 
   async function doExport() {
-    if (!run) return;
+    if (!wsId || !run) return;
     setBusy("Writing exports…");
     try {
-      const info = await api.exportRun(run.id);
-      setExportInfo(info);
-      const check = await api.file(run.id, run.main_path);
+      const info = await api.exportRun(wsId);
+      const check = await api.file(wsId, run.main_path);
       setSourceIntact(check.unchanged);
+      setExportInfo(info);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {
@@ -373,6 +759,7 @@ export default function App() {
   }
 
   function jumpToSpan(span: SourceSpan) {
+    setJumpTarget({ file: span.file_path, line: span.start_line });
     const finding = run?.findings.find(
       (f) =>
         f.source_span.file_path === span.file_path &&
@@ -380,16 +767,30 @@ export default function App() {
     );
     if (finding) {
       selectFinding(finding);
-    } else if (run) {
-      void loadFile(run, span.file_path).then(() => {
-        requestAnimationFrame(() => {
-          document.querySelector(`[data-line="${span.start_line}"]`)?.scrollIntoView({
-            block: "center",
-            behavior: "smooth",
-          });
+      return;
+    }
+    if (!run) return;
+    const scroll = () => {
+      requestAnimationFrame(() => {
+        document.querySelector(`[data-line="${span.start_line}"]`)?.scrollIntoView({
+          block: "center",
+          behavior: "smooth",
         });
       });
+    };
+    if (span.file_path === filePath) {
+      scroll();
+    } else {
+      void loadFile(wsId, span.file_path).then(scroll);
     }
+  }
+
+  function onReferenceAdded(id: string, label: string) {
+    setReferenceRows((rows) => [...rows, {
+      id, label, kind: "reference", created_at: "", revision_id: "", main_path: "",
+      run_id: "", root: "", stats: {},
+    }]);
+    setManageReference(id);
   }
 
   if (!run) {
@@ -399,59 +800,64 @@ export default function App() {
           <p className="eyebrow">PaperFamiliar · local-first manuscript instrument</p>
           <h1>Verify the research.<br />Preserve the author's voice.</h1>
           <p className="lede">
-            A LaTeX-first workbench that shows only what it can point to: mechanical citation
-            errors, honest metadata, and your own writing habits. No account. No cloud. No
-            similarity percentage.
+            A local web workbench for LaTeX papers. It shows only what it can point to:
+            mechanically decidable citation errors, honest reference metadata, and your own
+            writing habits. No account. No cloud. No similarity percentage.
           </p>
           <div className="landing-actions">
             <button className="primary" onClick={loadDemo} disabled={!!busy}>
               Load the offline demo
             </button>
-            <button className="ghost" onClick={() => setShowOpen(true)} disabled={!!busy}>
-              Open a LaTeX workspace
+            <button className="ghost" onClick={() => setShowImport("manuscript")} disabled={!!busy}>
+              Upload a paper
+            </button>
+            <button className="ghost" onClick={() => setShowImport("reference")} disabled={!!busy}>
+              Add reference papers
             </button>
           </div>
           {busy && <p className="busy">{busy}</p>}
           {error && <p className="error">{error}</p>}
+          {manuscripts.length > 0 && (
+            <div className="recent">
+              <h3>Resume a saved review</h3>
+              <ul>
+                {manuscripts.map((row) => (
+                  <li key={row.id}>
+                    <button onClick={() => api.workspace(row.id).then(adopt)}>
+                      <strong>{row.label}</strong>
+                      <span className="mono small">rev {shortSha(row.revision_id)}</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
           <ul className="privacy">
-            <li>Binds 127.0.0.1 only; no telemetry, fonts or CDN.</li>
-            <li>Every finding must reproduce an exact quote from your bytes.</li>
-            <li>Style differences are described, never scored or called errors.</li>
+            <li>One local Python service, opened at 127.0.0.1 — no telemetry, fonts or CDN.</li>
+            <li>Every finding must reproduce an exact quote from your bytes; originals are never edited.</li>
+            <li>Style differences are described, never scored, and never called academic errors.</li>
           </ul>
           <p className="fine">
-            Demo data is synthetic. It includes deliberate defects (a missing citation, a
-            duplicate label, a misattributed citation, and prompt-injection text in a comment).
+            The demo is synthetic and contains deliberate defects: a missing citation, a duplicate
+            label, an undefined reference, a misattributed real citation, and prompt-injection text
+            inside a comment.
           </p>
         </div>
-        {showOpen && (
-          <div className="modal-backdrop" onClick={() => setShowOpen(false)}>
-            <div className="modal" onClick={(event) => event.stopPropagation()}>
-              <h2>Open a workspace</h2>
-              <p>
-                Paste the absolute path to a folder containing .tex and .bib files, or to a .zip.
-                PaperFamiliar reads it in place and never writes to it.
-              </p>
-              <input
-                autoFocus
-                value={openPath}
-                placeholder="C:\Users\you\Documents\论文 项目"
-                onChange={(event) => setOpenPath(event.target.value)}
-                onKeyDown={(event) => event.key === "Enter" && openWorkspace()}
-              />
-              <div className="modal-actions">
-                <button className="ghost" onClick={() => setShowOpen(false)}>Cancel</button>
-                <button className="primary" onClick={openWorkspace} disabled={!!busy}>
-                  Scan workspace
-                </button>
-              </div>
-            </div>
-          </div>
+        {showImport && (
+          <ImportModal
+            presetKind={showImport}
+            onClose={() => setShowImport(null)}
+            onManuscript={adopt}
+            onReference={onReferenceAdded}
+            setError={setError}
+          />
         )}
       </div>
     );
   }
 
   const drift = run.style.drift;
+  const selectedRefs = run.style.reference_ids ?? [];
   const findingsByFile = run.files.map((file) => ({
     ...file,
     count: run.findings.filter((f) => f.source_span.file_path === file.path).length,
@@ -473,15 +879,25 @@ export default function App() {
         </div>
         <div className="run-meta">
           <span className="pill" title="No network, no telemetry">offline</span>
-          <span className="mono" title={run.revision_id}>
-            rev {shortSha(run.revision_id)}
-          </span>
+          <span className="mono" title={run.revision_id}>rev {shortSha(run.revision_id)}</span>
           <span>{run.files.length} files · {run.findings.length} findings</span>
           {!fileUnchanged && <span className="warn">source changed on disk</span>}
         </div>
         <div className="top-actions">
-          <button className="ghost" onClick={loadDemo}>Reload demo</button>
-          <button className="ghost" onClick={() => setShowOpen(true)}>Open workspace</button>
+          <button className="ghost" onClick={() => setShowImport("manuscript")}>Import</button>
+          <button className="ghost" onClick={reaudit} title="Re-run the deterministic audit">Re-audit</button>
+          <button
+            className="ghost"
+            title="Optional local or cloud model; off by default"
+            onClick={() => {
+              const selection = window.getSelection()?.toString() ?? "";
+              setSelectedText(selection.trim().length > 40 ? selection : fileText);
+              setShowModels(true);
+            }}
+          >
+            Models
+          </button>
+          <button className="ghost" onClick={() => setShowSettings(true)}>Data</button>
           <button className="primary" onClick={doExport}>Export</button>
         </div>
       </header>
@@ -494,7 +910,7 @@ export default function App() {
       )}
       {run.assumptions.length > 0 && (
         <div className="banner assumptions">
-          <strong>Demo assumptions:</strong> {run.assumptions[0]}
+          <strong>Assumptions:</strong> {run.assumptions[0]}
           <details>
             <summary>all</summary>
             <ul>{run.assumptions.map((item) => <li key={item}>{item}</li>)}</ul>
@@ -508,8 +924,11 @@ export default function App() {
             <h2>Paper map</h2>
             <span className="muted">{run.sections.length} sections</span>
           </div>
-          <SectionTree sections={run.sections} onSelect={(s) => jumpToSpan(s.heading_span)}
-                       onLabel={labelSection} />
+          <SectionTree
+            sections={run.sections}
+            onSelect={(s) => jumpToSpan(s.heading_span)}
+            onLabel={labelSection}
+          />
           <div className="navigator">
             <h3>Familiarity navigator</h3>
             <p className="hint">Deterministic. If it cannot find a section, it says so.</p>
@@ -559,7 +978,7 @@ export default function App() {
               <button
                 key={file.path}
                 className={file.path === filePath ? "active" : ""}
-                onClick={() => run && loadFile(run, file.path)}
+                onClick={() => loadFile(wsId, file.path)}
                 title={file.path}
               >
                 {file.path.split("/").pop()}
@@ -569,16 +988,21 @@ export default function App() {
           </div>
           <div className="source-head">
             <span className="mono">{filePath}</span>
-            <span className="mono muted">sha {shortSha(run.files.find((f) => f.path === filePath)?.sha256 ?? "")}</span>
+            <span className="mono muted">
+              sha {shortSha(run.files.find((f) => f.path === filePath)?.sha256 ?? "")}
+            </span>
           </div>
-          <div className="source" ref={sourceRef}>
+          <div className="source">
             <pre>
               {lines.map((line, index) => {
                 const number = index + 1;
                 const marks = marksForLine(run.findings, lines, filePath, number);
-                const activeLine = activeFinding
-                  ? run.findings.find((f) => f.id === activeFinding)?.source_span.start_line === number
-                  : false;
+                const activeLine =
+                  (jumpTarget && jumpTarget.file === filePath && jumpTarget.line === number) ||
+                  (activeFinding
+                    ? run.findings.find((f) => f.id === activeFinding)?.source_span.start_line ===
+                      number
+                    : false);
                 return (
                   <div key={number} className={`src-line ${activeLine ? "active" : ""}`} data-line={number}>
                     <span className="gutter">{number}</span>
@@ -636,6 +1060,18 @@ export default function App() {
                   </ul>
                 </details>
               )}
+              {run.security_events.length > 0 && (
+                <details className="rejections">
+                  <summary>{run.security_events.length} security event(s)</summary>
+                  <ul>
+                    {run.security_events.map((event, index) => (
+                      <li key={index}>
+                        <code>{event.kind}</code> — {event.detail}
+                      </li>
+                    ))}
+                  </ul>
+                </details>
+              )}
               <p className="ledger-note">
                 “Verified error” means a mechanical rule failed. It does not mean the paper's
                 claims are wrong. Accepting a finding never upgrades its evidence level.
@@ -646,13 +1082,51 @@ export default function App() {
           {tab === "style" && (
             <div className="style-pane">
               <div className="baseline">
-                <h3>Your reference profile</h3>
+                <h3>Reference papers (your approved writing)</h3>
+                {referenceRows.length === 0 && (
+                  <p className="hint">
+                    No reference papers yet. Upload your earlier LaTeX papers with
+                    “Add reference papers”, mark the sections you wrote, then select them here.
+                  </p>
+                )}
+                <ul className="ref-list">
+                  {referenceRows.map((row) => (
+                    <li key={row.id}>
+                      <label className="check-row">
+                        <input
+                          type="checkbox"
+                          checked={selectedRefs.includes(row.id)}
+                          onChange={(event) => {
+                            const ids = event.target.checked
+                              ? [...selectedRefs, row.id]
+                              : selectedRefs.filter((x) => x !== row.id);
+                            void refreshStyle(ids).catch((err: Error) => setError(err.message));
+                          }}
+                        />
+                        <span>{row.label}</span>
+                      </label>
+                      <button className="ghost small" onClick={() => setManageReference(row.id)}>
+                        label sections
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+                {selectedRefs.length === 0 && (
+                  <p className="hint">Select at least three papers; fewer means honest abstention, not a score.</p>
+                )}
                 <p className={`status-line ${run.style.baseline.status}`}>
                   {run.style.baseline.status === "ok"
                     ? `${run.style.baseline.papers_used} approved papers · ${run.style.baseline.sentences} sentences`
                     : "Insufficient reference data"}
                 </p>
                 {run.style.baseline.status !== "ok" && <p>{run.style.baseline.reason}</p>}
+                {(run.style.references ?? []).length > 0 && (
+                  <p className="hint small">
+                    {(run.style.references ?? [])
+                      .map((ref) => `${ref.label ?? ref.id}: ${ref.status}${ref.sections_used ? ` (${ref.sections_used} sections)` : ""}`)
+                      .join(" · ")}
+                  </p>
+                )}
                 {run.style.baseline.profile && (
                   <ul className="baseline-metrics">
                     <li><span>Sentence length</span><strong>{run.style.baseline.profile.mean_sentence_len} words</strong></li>
@@ -671,13 +1145,11 @@ export default function App() {
               </div>
               <h3 className="section-heading">Drift cards</h3>
               <p className="hint">
-                A difference is a description of this section, not a quality judgement and not
-                evidence of authorship. Small samples are marked low confidence.
+                Sections you mark “I wrote it” are compared with the baseline above. A difference
+                is a description, not a quality judgement. Small samples are marked low confidence.
               </p>
               {drift.length === 0 && (
-                <p className="empty">
-                  No drift cards: {run.style.baseline.reason}
-                </p>
+                <p className="empty">No drift cards: {run.style.baseline.reason}</p>
               )}
               {drift.map((card) => <DriftCardView key={card.section_id} card={card} />)}
               <p className="note">{run.style.note}</p>
@@ -730,32 +1202,36 @@ export default function App() {
         </aside>
       </main>
 
-      {showOpen && (
-        <div className="modal-backdrop" onClick={() => setShowOpen(false)}>
-          <div className="modal" onClick={(event) => event.stopPropagation()}>
-            <h2>Open a workspace</h2>
-            <p>
-              Paste the absolute path to a folder containing .tex and .bib files, or to a .zip.
-              PaperFamiliar reads it in place and never writes to it.
-            </p>
-            <input
-              autoFocus
-              value={openPath}
-              placeholder="C:\Users\you\Documents\论文 项目"
-              onChange={(event) => setOpenPath(event.target.value)}
-              onKeyDown={(event) => event.key === "Enter" && openWorkspace()}
-            />
-            <div className="modal-actions">
-              <button className="ghost" onClick={() => setShowOpen(false)}>Cancel</button>
-              <button className="primary" onClick={openWorkspace} disabled={!!busy}>
-                Scan workspace
-              </button>
-            </div>
-          </div>
-        </div>
+      {showImport && (
+        <ImportModal
+          presetKind={showImport}
+          onClose={() => setShowImport(null)}
+          onManuscript={adopt}
+          onReference={onReferenceAdded}
+          setError={setError}
+        />
       )}
 
-      {exportInfo && (
+      {manageReference && (
+        <ReferenceModal
+          workspaceId={manageReference}
+          onClose={() => setManageReference(null)}
+          setError={setError}
+        />
+      )}
+
+      {showSettings && (
+        <SettingsModal
+          onClose={() => setShowSettings(false)}
+          onChanged={() => {
+            localStorage.removeItem(LAST_WORKSPACE_KEY);
+            setRun(null);
+          }}
+          setError={setError}
+        />
+      )}
+
+      {exportInfo && run && (
         <div className="modal-backdrop" onClick={() => setExportInfo(null)}>
           <div className="modal wide" onClick={(event) => event.stopPropagation()}>
             <h2>Exports written</h2>
@@ -763,7 +1239,7 @@ export default function App() {
             <ul className="export-list">
               {exportInfo.files.map((name) => (
                 <li key={name}>
-                  <a href={api.exportUrl(run.id, name)} download>{name}</a>
+                  <a href={api.exportUrl(wsId, name)} download>{name}</a>
                 </li>
               ))}
             </ul>
@@ -783,6 +1259,13 @@ export default function App() {
             </div>
           </div>
         </div>
+      )}
+
+      {showModels && (
+        <ModelsPanel
+          getSelectedText={() => selectedText || fileText}
+          onClose={() => setShowModels(false)}
+        />
       )}
 
       {busy && <div className="busy-toast">{busy}</div>}

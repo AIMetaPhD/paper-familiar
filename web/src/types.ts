@@ -104,19 +104,22 @@ export interface FileRow {
 
 export interface RunSummary {
   id: string;
+  workspace_id: string | null;
   created_at: string;
   label: string;
   main_path: string;
   revision_id: string;
   findings: Finding[];
-  rejections: { finding_id: string; rule_id: string; reason: string; claimed_span: SourceSpan }[];
+  rejections: { finding_id: string; rule_id: string; reason: string; claimed_span: SourceSpan; note?: string }[];
   security_events: { kind: string; detail: string; path?: string; source_span?: SourceSpan }[];
   stats: Record<string, number>;
   sections: SectionMeta[];
   style: {
     baseline: Baseline;
     drift: DriftCard[];
-    history: { path: string; contribution?: string; sections_used?: number; status?: string }[];
+    reference_ids?: string[];
+    references?: { id: string; label?: string; status: string; sections_used?: number }[];
+    history?: { path: string; contribution?: string; sections_used?: number; status?: string }[];
     note: string;
   };
   cognitive: Cognitive;
@@ -126,9 +129,82 @@ export interface RunSummary {
   mode: string;
 }
 
+export interface WorkspaceRow {
+  id: string;
+  label: string;
+  kind: "manuscript" | "reference" | "demo";
+  created_at: string;
+  revision_id: string;
+  main_path: string;
+  run_id: string;
+  root: string;
+  stats: Record<string, number>;
+}
+
+export interface ReferenceResponse {
+  workspace_id: string;
+  kind: "reference";
+  label: string;
+  sections: { id: string; title: string; contribution: string; sentences: number }[];
+}
+
+export interface Usage {
+  data_dir: string;
+  workspaces: number;
+  runs: number;
+  database_bytes: number;
+  workspaces_bytes: number;
+  exports_bytes: number;
+  cache_bytes: number;
+}
+
+export interface Settings {
+  usage: Usage;
+  references: WorkspaceRow[];
+  providers: ProviderStatus;
+}
+
 export interface NavigateResult {
   status: "found" | "not_found";
   query: string;
   reason?: string;
   matches: { section_id: string; title: string; role: string; score: number; reasons: string[]; span: SourceSpan }[];
+}
+
+export interface ProviderStatus {
+  local: { status: string; models: string[]; endpoint: string; detail?: string };
+  cloud: {
+    configured: boolean;
+    endpoint: string | null;
+    model: string | null;
+    key_env: string | null;
+    key_present: boolean;
+  };
+  strict_offline_default: boolean;
+}
+
+export interface ProviderPreview {
+  consent_id: string;
+  provider: string;
+  endpoint: string;
+  model: string;
+  payload: unknown;
+  payload_sha256: string;
+  payload_bytes: number;
+  estimated_tokens: number;
+  redactions: number;
+  is_local: boolean;
+  requires_network: boolean;
+  notice: string;
+  created_at: string;
+}
+
+export interface ProviderResult {
+  status: string;
+  provider: string;
+  model?: string;
+  content?: string;
+  detail?: string;
+  candidate_only?: boolean;
+  notice?: string;
 }

@@ -2,15 +2,45 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "User Signed Acceptance Record",
   "type": "object",
-  "required": ["schema_version", "commit_sha", "decision", "approved_at", "blind_test_evidence_path", "user_confirmation", "public_release_authorized"],
+  "required": [
+    "schema_version",
+    "commit_sha",
+    "decision",
+    "approved_at",
+    "blind_test_evidence_path",
+    "user_confirmation",
+    "public_release_authorized"
+  ],
   "properties": {
-    "schema_version": {"const": "1.1"},
-    "commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
-    "decision": {"enum": ["APPROVED", "DECLINED", "PENDING"]},
-    "approved_at": {"type": "string", "format": "date-time"},
-    "blind_test_evidence_path": {"type": "string", "minLength": 1},
-    "user_confirmation": {"type": "string", "minLength": 20},
-    "public_release_authorized": {"const": false}
+    "schema_version": {
+      "const": "1.2"
+    },
+    "commit_sha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "decision": {
+      "enum": [
+        "APPROVED",
+        "DECLINED",
+        "PENDING"
+      ]
+    },
+    "approved_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "blind_test_evidence_path": {
+      "type": "string",
+      "minLength": 1
+    },
+    "user_confirmation": {
+      "type": "string",
+      "minLength": 20
+    },
+    "public_release_authorized": {
+      "const": false
+    }
   },
   "additionalProperties": false
 }

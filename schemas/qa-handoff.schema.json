@@ -1,27 +1,209 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://paperfamiliar.local/schema/qa-handoff-v1.1.json",
+  "$id": "https://paperfamiliar.local/schema/qa-handoff-v1.2.json",
   "title": "Claude to Muse QA Handoff",
   "type": "object",
-  "required": ["schema_version", "gate", "commit_sha", "run_id", "created_at", "status", "environment_fingerprint", "tested_platforms", "executed_commands", "checks", "failed_gates", "evidence_paths", "network_isolation_proof"],
+  "required": [
+    "schema_version",
+    "gate",
+    "commit_sha",
+    "run_id",
+    "created_at",
+    "status",
+    "environment_fingerprint",
+    "tested_platforms",
+    "executed_commands",
+    "checks",
+    "failed_gates",
+    "evidence_paths",
+    "network_isolation_proof",
+    "browsers_tested"
+  ],
   "properties": {
-    "schema_version": {"const": "1.1"},
-    "gate": {"enum": ["G1","G2","G3","G4","G5"]},
-    "commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
-    "run_id": {"type": "string", "minLength": 8},
-    "created_at": {"type": "string", "format": "date-time"},
-    "status": {"const": "SUBMITTED"},
-    "environment_fingerprint": {"type": "string", "minLength": 10},
-    "tested_platforms": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"enum": ["windows11_x64","macos_apple_silicon_arm64","linux_ci"]}},
-    "executed_commands": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/command"}},
-    "checks": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/check"}},
-    "failed_gates": {"type": "array", "items": {"type": "string"}},
-    "evidence_paths": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
-    "network_isolation_proof": {"type": "string", "minLength": 1}
+    "schema_version": {
+      "const": "1.2"
+    },
+    "gate": {
+      "enum": [
+        "G1",
+        "G2",
+        "G3",
+        "G4",
+        "G5"
+      ]
+    },
+    "commit_sha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "run_id": {
+      "type": "string",
+      "minLength": 8
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "status": {
+      "const": "SUBMITTED"
+    },
+    "environment_fingerprint": {
+      "type": "string",
+      "minLength": 10
+    },
+    "tested_platforms": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "windows11_x64",
+          "macos_apple_silicon_arm64",
+          "linux_x64",
+          "linux_arm64",
+          "linux_ci",
+          "other_local"
+        ]
+      }
+    },
+    "executed_commands": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/command"
+      }
+    },
+    "checks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/check"
+      }
+    },
+    "failed_gates": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "evidence_paths": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "network_isolation_proof": {
+      "type": "string",
+      "minLength": 1
+    },
+    "browsers_tested": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "chromium",
+          "firefox",
+          "webkit"
+        ]
+      }
+    }
   },
   "additionalProperties": false,
   "$defs": {
-    "command": {"type":"object", "required":["command","exit_code","platform","log_path"],"properties":{"command":{"type":"string","minLength":1},"exit_code":{"type":"integer"},"platform":{"type":"string"},"log_path":{"type":"string","minLength":1}},"additionalProperties":false},
-    "check": {"type":"object", "required":["id","status","expected","observed","platforms_tested","evidence_paths"], "properties":{"id":{"type":"string","minLength":2},"status":{"enum":["PASS","FAIL","UNTESTED","BLOCKED"]},"expected":{"type":"string","minLength":1},"observed":{"type":"string","minLength":1},"platforms_tested":{"type":"array","minItems":1,"uniqueItems":true,"items":{"enum":["windows11_x64","macos_apple_silicon_arm64","linux_ci"]}},"evidence_paths":{"type":"array","items":{"type":"string"}}},"additionalProperties":false}
+    "command": {
+      "type": "object",
+      "required": [
+        "command",
+        "exit_code",
+        "platform",
+        "log_path"
+      ],
+      "properties": {
+        "command": {
+          "type": "string",
+          "minLength": 1
+        },
+        "exit_code": {
+          "type": "integer"
+        },
+        "platform": {
+          "type": "string"
+        },
+        "log_path": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "check": {
+      "type": "object",
+      "required": [
+        "id",
+        "status",
+        "expected",
+        "observed",
+        "platforms_tested",
+        "evidence_paths",
+        "browsers_tested"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 2
+        },
+        "status": {
+          "enum": [
+            "PASS",
+            "FAIL",
+            "UNTESTED",
+            "BLOCKED"
+          ]
+        },
+        "expected": {
+          "type": "string",
+          "minLength": 1
+        },
+        "observed": {
+          "type": "string",
+          "minLength": 1
+        },
+        "platforms_tested": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "windows11_x64",
+              "macos_apple_silicon_arm64",
+              "linux_x64",
+              "linux_arm64",
+              "linux_ci",
+              "other_local"
+            ]
+          }
+        },
+        "evidence_paths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "browsers_tested": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "chromium",
+              "firefox",
+              "webkit"
+            ]
+          }
+        }
+      },
+      "additionalProperties": false
+    }
   }
 }

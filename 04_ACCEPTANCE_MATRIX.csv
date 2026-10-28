@@ -1,35 +1,48 @@
-gate,id,category,required_platforms,expected_result,owner,critical
-G1,OFF-01,offline,"windows11_x64;macos_apple_silicon_arm64","No API key/no network demo, audit, click source, export",Muse,true
-G1,WIN-01,platform,windows11_x64,"Native PowerShell script startup without Docker/WSL/Node for end user",Muse,true
-G1,MAC-01,platform,macos_apple_silicon_arm64,"Native arm64 startup without Rosetta/Docker/Node",Muse,true
-G1,OS-PATH-01,source_mapping,"windows11_x64;macos_apple_silicon_arm64","Unicode+spaces path, multi input, exact file line col, CRLF/LF",Muse,true
-G1,UX-01,interaction,"windows11_x64;macos_apple_silicon_arm64","Paper Map issue click -> correct source -> evidence -> export",Muse,true
-G1,UX-02,layout,"windows11_x64;macos_apple_silicon_arm64","1280x800 and 1440x900 without broken interaction",Muse,false
-G2,EVD-01,mechanical,"windows11_x64;macos_apple_silicon_arm64","Missing cite/ref and duplicate label detected; valid controls not false positive",Muse,true
-G2,EVD-02,provenance,any,"Metadata-only cannot become claim-supported; offline unavailable",Muse,true
-G2,EVD-03,quote_gate,any,"Fabricated quote rejected before user ledger; mismatch logged",Muse,true
-G2,ADV-04,citation,any,"Trojan real citation with wrong claim never marked supported",Muse,true
-G2,ADV-05,injection,any,"LLM hallucinated quote changes never pass intake",Muse,true
-G2,ADV-06,injection,any,"TeX comment injected instructions cannot hijack agent or leak keys",Muse,true
-G2,SEC-ZIP,security,"windows11_x64;macos_apple_silicon_arm64","Zip-slip/symlink/special file/zip bomb blocked",Muse,true
-G2,SEC-TEX,security,"windows11_x64;macos_apple_silicon_arm64","Unsafe input and macros do not open outside workspace; no compilation",Muse,true
-G2,SEC-SOURCE,source_mapping,any,"Immutable original file hash and byte-exact quote/span matching",Muse,true
-G3,ADV-01,style,any,"Same-topic different-author hard negatives not treated as same style",Muse,true
-G3,ADV-02,style,any,"Same-author cross-topic not flagged solely due to jargon",Muse,true
-G3,ADV-03,style,any,"Coauthor nonprimary sections excluded from fingerprint",Muse,true
-G3,STYLE-01,style,any,"Detex removes math/table/algorithm macro noise; phrases grounded",Muse,true
-G3,STYLE-02,style,any,"Too few approved papers -> insufficient data no 0-100 score",Muse,true
-G3,FAM-01,navigator,"windows11_x64;macos_apple_silicon_arm64","No-model Paper Map; find Problem/Formulation; no hallucinated location",Muse,true
-G3,FAM-02,structure,any,"Section tree and definition/theorem/algorithm order explainable",Muse,false
-G4,SEC-01,privacy,"windows11_x64;macos_apple_silicon_arm64","Strict offline zero outbound incl telemetry/fonts",Muse,true
-G4,SEC-02,privacy,"windows11_x64;macos_apple_silicon_arm64","Cloud consent preview actual payload; no outbound pre-consent",Muse,true
-G4,SEC-SECRET,privacy,any,"No API key in logs/reports/exports/repo",Muse,true
-G4,AI-01,model,"windows11_x64;macos_apple_silicon_arm64","Local Ollama/OpenAI-compatible works or explicit unavailable fallback",Muse,true
-G4,AI-02,model,any,"Mock cloud request verifies endpoint and payload consent; real provider claims not fabricated",Muse,true
-G4,STYLE-03,read_only,"windows11_x64;macos_apple_silicon_arm64","Accept/Dismiss/export do not mutate source SHA",Muse,true
-G4,UX-03,report,any,"Report json/md and agent voice guide export; no unpublished text by default",Muse,true
-G5,OPS-01,release,"windows11_x64;macos_apple_silicon_arm64","Installation docs match clean-machine setup and E2E",Muse,true
-G5,QA-01,independence,any,"Muse actual independent execution log and source recorded",Muse,true
-G5,QA-02,regression,"windows11_x64;macos_apple_silicon_arm64","All critical cases rerun on same final commit; no known blockers",Muse,true
-G5,USER-01,human,any,"User personally confirms blind style/familiarity test",User,true
-G5,SEC-PUBLISH,privacy,any,"No sensitive source/credentials/binary licensing blockers for private push",Muse,true
+gate,id,category,required_platforms,required_browsers,assertion,tester,critical
+G1,OFF-01,offline,any,chromium;firefox;webkit,Without network/API keys/model: local browser opens Demo -> audit -> source jump -> export,Muse,true
+G1,WEB-SERVE,runtime,any,chromium,One local Python FastAPI server on 127.0.0.1:8420; no SaaS login,Muse,true
+G1,WEB-PACK,packaging,any,any,Built Python wheel includes React static assets; Node/Vite not required at runtime,Muse,true
+G1,WEB-UI-SMOKE,browser,any,chromium;firefox;webkit,Basic UI startup + Paper Map + Issue Ledger across three Playwright browser engines,Muse,true
+G1,WEB-NOPLATFORM,architecture,any,any,"No Windows/macOS native GUI, Electron/Tauri/desktop installers in required runtime",Muse,true
+G1,WEB-STATE-BOOT,persistence,any,chromium,"Uploaded demo and decisions survive refresh, browser reopen, server restart",Muse,true
+G1,UX-01,interaction,any,chromium;firefox;webkit,Paper Map -> issue click -> exact LaTeX source span -> evidence -> export,Muse,true
+G1,OS-PATH-01,source_mapping,any,any,"Unicode + spaces paths, CRLF/LF and multi input have stable relative file/line/col",Muse,true
+G1,WEB-PORT,runtime,any,chromium,Port conflict clearly diagnosed; no fallback to 0.0.0.0/public bind,Muse,true
+G2,EVD-01,mechanical,any,any,Undefined citation/ref keys and duplicate labels detected with negative controls,Muse,true
+G2,EVD-02,provenance,any,any,Metadata-only citation never mislabeled claim-supported; offline unavailable,Muse,true
+G2,EVD-03,quote_gate,any,any,Fabricated exact quote rejected before user issue ledger,Muse,true
+G2,ADV-04,citation,any,any,Trojan real citation with false supported claim not marked supported,Muse,true
+G2,ADV-05,quote_gate,any,any,LLM hallucinated/mismatched quote never survives intake gate,Muse,true
+G2,ADV-06,prompt_injection,any,any,TeX comment injection cannot hijack agent or leak keys,Muse,true
+G2,SEC-ZIP,security,any,any,Zip-slip/symlink/special-file/zip bomb blocked,Muse,true
+G2,SEC-TEX,security,any,any,Unsafe input and macros do not read outside workspace; no compile/execution,Muse,true
+G2,SEC-SOURCE,source_mapping,any,any,Immutable source file SHA and byte-exact quote/source-span matching,Muse,true
+G2,WEB-HOST,web_security,any,chromium,Reject malicious Host header and DNS rebinding; loopback-only default,Muse,true
+G2,WEB-CSRF,web_security,any,chromium;firefox;webkit,Cross-origin page cannot mutate local review data; Origin/CSRF/CORS protections,Muse,true
+G2,WEB-FILE,web_security,any,any,"REST API cannot read arbitrary paths, serve private keys, or escape workspace",Muse,true
+G3,ADV-01,style,any,any,Same-topic different-author hard negatives not mistaken for matching voice,Muse,true
+G3,ADV-02,style,any,any,Same-author cross-topic does not flag jargon as writing-style error,Muse,true
+G3,ADV-03,style,any,any,Coauthor/unknown sections excluded from author-approved profile,Muse,true
+G3,STYLE-01,style,any,any,"Detex removes math, algorithm, table macro noise and preserves grounded prose",Muse,true
+G3,STYLE-02,style,any,any,Insufficient approved papers -> honest abstention; no 0-100 index,Muse,true
+G3,FAM-01,navigator,any,chromium;firefox;webkit,No-model Paper Map finds problem/formulation; unknown -> not_found not hallucinated,Muse,true
+G3,FAM-02,structure,any,any,Section tree and def/theorem/algorithm order explainable with source references,Muse,false
+G3,STYLE-CARD,style,any,chromium,"Drift Cards include approved history examples or source spans, no forced rewrite",Muse,true
+G4,WEB-E2E,browser,any,chromium;firefox;webkit,Full browser E2E import->audit->jump->style->Accept/Dismiss->export,Muse,true
+G4,WEB-PERSIST,persistence,any,chromium;firefox;webkit,Browser refresh + close/reopen + service restart restore workspace/decisions,Muse,true
+G4,WEB-DELETE,persistence,any,chromium,Delete workspace/profile clears SQLite links and cached derived material,Muse,true
+G4,SEC-01,privacy,any,chromium;firefox;webkit,Strict offline browser+backend zero outbound including fonts/telemetry/CDN,Muse,true
+G4,SEC-02,privacy,any,chromium,Cloud preview actual payload; no outbound pre-consent; cancellation safe,Muse,true
+G4,SEC-SECRET,privacy,any,any,No secrets in logs/reports/exports/repo; frontend persistence free of API keys,Muse,true
+G4,AI-01,model,any,any,Local Ollama/OpenAI-compatible or explicit unavailable fallback to deterministic mode,Muse,true
+G4,AI-02,model,any,any,Cloud mock verifies endpoint/payload consent; real API use not fabricated,Muse,true
+G4,STYLE-03,read_only,any,any,Accept/Dismiss/export do not mutate original source SHA,Muse,true
+G4,UX-03,report,any,chromium;firefox;webkit,Report JSON/MD and writing agent voice/structure guide export safe by default,Muse,true
+G4,UX-02,layout,any,chromium;firefox;webkit,"Desktop 1280x800, 1440x900 no broken layout; narrow report readable",Muse,false
+G4,WEB-LAN,security,any,any,No public/LAN bind by default; remote-compatible LLM endpoint treated as Cloud,Muse,true
+G5,OPS-01,release,any,chromium,Clean virtualenv install/wheel build/source runbook matches actual browser-first startup,Muse,true
+G5,QA-01,independence,any,any,Muse actual independent transport/run provenance and same commit SHA recorded,Muse,true
+G5,QA-02,regression,any,chromium;firefox;webkit,All critical browser + security cases rerun on one final SHA; zero blockers,Muse,true
+G5,USER-01,human,any,any,User personally approves blinded author familiarity experience,User,true
+G5,SEC-PUBLISH,privacy,any,any,No unpublished text/credentials/third-party asset licensing issues in candidate repo,Muse,true
+G5,OPS-COMPAT,compatibility,any,any,Honest README tested OS/Python/engine matrix; CI OS smoke best effort,Muse,false

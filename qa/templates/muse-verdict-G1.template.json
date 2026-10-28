@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.1",
+  "schema_version": "1.2",
   "gate": "G1",
   "commit_sha": "REPLACE_WITH_REAL_40_HEX_COMMIT_SHA",
   "run_id": "REPLACE_WITH_REAL_RUN_ID",
@@ -8,12 +8,25 @@
   "tester_identity": "NOT_CONNECTED",
   "tester_origin": "independent_muse",
   "independent_run_proof_path": "REPLACE_WITH_REAL_TRANSPORT_LOG",
-  "environment_fingerprint": "REPLACE_WITH_PLATFORM_FINGERPRINT",
+  "environment_fingerprint": "REPLACE_WITH_REAL_HOST_BROWSER_FINGERPRINT",
   "tested_platforms": [],
   "executed_commands": [],
-  "checks": [{"id":"OFF-01","status":"UNTESTED","expected":"Offline demo works","observed":"NOT RUN","evidence_paths":[]}],
-  "failed_gates": ["NOT_RUN"],
+  "checks": [
+    {
+      "id": "OFF-01",
+      "status": "UNTESTED",
+      "expected": "Installed local Python service and browser complete offline Demo -> Audit -> Jump -> Export without external network calls",
+      "observed": "NOT RUN",
+      "evidence_paths": [],
+      "browsers_tested": [],
+      "platforms_tested": []
+    }
+  ],
+  "failed_gates": [
+    "NOT_RUN"
+  ],
   "evidence_paths": [],
   "network_isolation_proof": "REPLACE_WITH_FILE_PATH",
-  "report_path": "REPLACE_WITH_MUSE_REPORT_PATH"
+  "report_path": "REPLACE_WITH_MUSE_REPORT_PATH",
+  "browsers_tested": []
 }

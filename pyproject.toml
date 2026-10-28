@@ -34,7 +34,7 @@ include-package-data = true
 where = ["src"]
 
 [tool.setuptools.package-data]
-paperfamiliar = ["web/dist/**/*", "demo/**/*"]
+paperfamiliar = ["web/dist/**/*", "demo/**/*", "demo/draft/**/*", "demo/history/**/*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
