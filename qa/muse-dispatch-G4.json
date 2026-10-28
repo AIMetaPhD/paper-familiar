@@ -1,0 +1,14 @@
+{
+  "gate": "G4",
+  "commit_sha": "494eaefbde3f6a5e950515bac10e3aff5903ce21",
+  "handoff_run_id": "62917f34b78f",
+  "dispatched_at": "2026-10-28T17:36:30.444497+00:00",
+  "tasks": [
+    {
+      "recipient": "muse-3",
+      "task_id": "321327e750379f3e40a82ac0",
+      "state": "pending"
+    }
+  ],
+  "note": "Provenance stamped server-side as claude producer. Verdicts must be produced by Muse; this script never writes muse-verdict-*.json."
+}

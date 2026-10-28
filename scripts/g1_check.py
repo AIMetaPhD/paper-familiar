@@ -251,9 +251,15 @@ def main() -> int:
         "executed_commands": commands,
         "summary": f"{passed}/{len(checks)} checks passed",
     }
-    out = Path(args.out) if args.out else ev_dir / f"g1-check-{run_id}.json"
+    out = (Path(args.out) if args.out else
+           ev_dir / f"g1-check-{run_id}.json").resolve()
+    out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(doc, indent=2, ensure_ascii=False), encoding="utf-8")
-    print(f"\nwrote {out.relative_to(ROOT)}  ({doc['summary']})")
+    try:
+        shown = out.relative_to(ROOT)
+    except ValueError:
+        shown = out
+    print(f"\nwrote {shown}  ({doc['summary']})")
     return 0 if passed == len(checks) and checks else 1
 
 

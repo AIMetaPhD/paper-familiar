@@ -1,6 +1,9 @@
 .venv/
 .tmpdata*/
 .g1-data-*/
+.wheeltest/
+.wheeldata/
+qa/muse-poll.log
 dist/
 build/
 *.egg-info/
