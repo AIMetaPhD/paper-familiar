@@ -1,0 +1,127 @@
+{
+  "collected_at": "2026-10-29T02:10:00+08:00",
+  "note": "Muse round-1 responses. muse-3 verified claude provenance server-side but declined to open the SSH file-access leg (its own authorization relay: it asks the human dispatch owner to approve a matching permission first - recorded verbatim, not paraphrased). muse-2 listed concrete blockers incl. a real contradiction in our dispatch (read_only vs required writes) - fixed in cdc3910. muse-1 still working G1 (claimed). No VERIFIED/FAILED judgement was issued by any Muse in round 1; gates remain open.",
+  "tasks": [
+    {
+      "task_id": "321327e750379f3e40a82ac0",
+      "gate": "G4",
+      "recipient": "muse-3",
+      "state": "finished",
+      "claimed_by": "muse-3",
+      "result": {
+        "evidence": {
+          "commit_sha": "494eaefbde3f6a5e950515bac10e3aff5903ce21",
+          "gate": "G4",
+          "identity": "muse-3",
+          "kind": "paperfamiliar_gate_g4",
+          "next_step": "请发布方取得 George 当下逐任务执行授权后，按匹配权限重派，或转交已获授权的执行者；本回传不代表 gate G4 已验证。",
+          "not_done": [
+            "未 SSH",
+            "未执行 git/pip/Playwright 操作",
+            "未写入任何仓库文件",
+            "未作出 VERIFIED/FAILED 判定"
+          ],
+          "permission_declared": "read_only",
+          "provenance_verified": {
+            "authentication": "local-ip-and-producer-token",
+            "issuer": "claude",
+            "key_id": "claude-producer-v1",
+            "version": 1
+          },
+          "reason": "权限与执行范围不符，安全检查 fail-closed，拒绝执行。任务要求 SSH 进入工作站、git worktree、创建 venv 并安装 Playwright、写入仓库 qa/muse-verdict-G4.json 与 qa/muse-report-G4.md，超出 read_only，也超出 Claude 直接联络的只读与文字回执范围，且无 George 当下逐任务执行授权。",
+          "source_note": "来源标记经自有认证连接核对一致，认作本机 Claude 分派；来源核验不替代逐任务授权与平台安全检查。",
+          "task_id": "321327e750379f3e40a82ac0"
+        },
+        "status": "rejected"
+      }
+    },
+    {
+      "task_id": "674bf940eea9de4c462fc63b",
+      "gate": "G3",
+      "recipient": "muse-3",
+      "state": "finished",
+      "claimed_by": "muse-3",
+      "result": {
+        "evidence": {
+          "commit_sha": "d01b27fb5f4082a5cc5516f3fbbc077e47799e74",
+          "gate": "G3",
+          "identity": "muse-3",
+          "kind": "paperfamiliar_gate_g3",
+          "next_step": "请发布方取得 George 当下逐任务执行授权后，按匹配权限重派，或转交已获授权的执行者；本回传不代表 gate G3 已验证。",
+          "not_done": [
+            "未 SSH",
+            "未执行 git/pip/Playwright 操作",
+            "未写入任何仓库文件",
+            "未作出 VERIFIED/FAILED 判定"
+          ],
+          "permission_declared": "read_only",
+          "provenance_verified": {
+            "authentication": "local-ip-and-producer-token",
+            "issuer": "claude",
+            "key_id": "claude-producer-v1",
+            "version": 1
+          },
+          "reason": "权限与执行范围不符，安全检查 fail-closed，拒绝执行。任务要求 SSH 进入工作站、git worktree、创建 venv 并安装 Playwright、写入仓库 qa/muse-verdict-G3.json 与 qa/muse-report-G3.md，超出 read_only，也超出 Claude 直接联络的只读与文字回执范围，且无 George 当下逐任务执行授权。",
+          "source_note": "来源标记经自有认证连接核对一致，认作本机 Claude 分派；来源核验不替代逐任务授权与平台安全检查。",
+          "task_id": "674bf940eea9de4c462fc63b"
+        },
+        "status": "rejected"
+      }
+    },
+    {
+      "task_id": "bf509c3d24a623b69baa6631",
+      "gate": "G2",
+      "recipient": "muse-2",
+      "state": "finished",
+      "claimed_by": "muse-2",
+      "result": {
+        "evidence": {
+          "blocked_reasons": [
+            "Windows workstation SSH path not available from this Linux VM; no credential supplied and none solicited per muse-2 red line",
+            "Repo path E:\\ClaudeCodeFiles\\MyProducts\\PaperFamiliar\\paper-familiar not mounted or reachable here",
+            "Task permissions=read_only conflicts with required writes to qa/muse-verdict-G2.json and qa/muse-report-G2.md",
+            "No handoff file, schema, fixtures or code were attached to the queue task, so no check could be independently reproduced here"
+          ],
+          "checks_executed": 0,
+          "checks_failed": 0,
+          "checks_passed": 0,
+          "claim": "POST /tasks/bf509c3d24a623b69baa6631/claim with body {} -> HTTP 200 {\"ok\":true}",
+          "commit_sha": "494eaefbde3f6a5e950515bac10e3aff5903ce21",
+          "gate": "G2",
+          "kind": "paperfamiliar_gate_g2",
+          "not_done": [
+            "git commit verification",
+            "clean worktree checkout",
+            "venv install",
+            "Playwright UI checks",
+            "mutated fixture attacks",
+            "verdict/report writing"
+          ],
+          "provenance": {
+            "authentication": "local-ip-and-producer-token",
+            "issuer": "claude",
+            "key_id": "claude-producer-v1",
+            "version": 1
+          },
+          "provenance_verified": true,
+          "recipient": "muse-2",
+          "report_file": null,
+          "run_id": "640c1eb30e02",
+          "sender": "claude",
+          "summary": "BLOCKED, no checks executed and no verdict/report written: task requires SSH to a Windows workstation and repo path E:\\ClaudeCodeFiles\\MyProducts\\PaperFamiliar\\paper-familiar, which is not reachable from this Linux VM (no E: mount, no Windows SSH channel or credential supplied, and muse-2 must not solicit an SSH private key or use another party's credential); task permissions are read_only, which conflicts with the required writes to qa/muse-verdict-G2.json and qa/muse-report-G2.md, so no files were created or modified and no result was fabricated. Next step for Codex/Claude: either attach the handoff, schema and a repo snapshot at a path reachable by this VM, or run the G2 checks on the Windows side and hand the outputs back for independent review.",
+          "verdict": "BLOCKED",
+          "verdict_file": null
+        },
+        "status": "failure"
+      }
+    },
+    {
+      "task_id": "75f89f265b39da67722c1863",
+      "gate": "G1",
+      "recipient": "muse-1",
+      "state": "claimed",
+      "claimed_by": "muse-1",
+      "result": null
+    }
+  ]
+}
