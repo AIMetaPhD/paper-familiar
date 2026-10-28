@@ -213,7 +213,7 @@ function LedgerCard({
   );
 }
 
-function DriftCardView({ card }: { card: DriftCard }) {
+function DriftCardView({ card, onJump }: { card: DriftCard; onJump: (span: SourceSpan) => void }) {
   if (card.status !== "observed" || !card.axes) {
     return (
       <div className="drift-card muted">
@@ -230,6 +230,10 @@ function DriftCardView({ card }: { card: DriftCard }) {
           {card.sample?.sentences} sent · {card.sample?.confidence} confidence
         </span>
       </header>
+      <button className="location" onClick={() => onJump(card.span)}
+              title="Jump to this section's heading in the source">
+        {card.span.file_path}:{card.span.start_line}:{card.span.start_col}
+      </button>
       <table>
         <thead>
           <tr>
@@ -1151,7 +1155,7 @@ export default function App() {
               {drift.length === 0 && (
                 <p className="empty">No drift cards: {run.style.baseline.reason}</p>
               )}
-              {drift.map((card) => <DriftCardView key={card.section_id} card={card} />)}
+              {drift.map((card) => <DriftCardView key={card.section_id} card={card} onJump={jumpToSpan} />)}
               <p className="note">{run.style.note}</p>
             </div>
           )}

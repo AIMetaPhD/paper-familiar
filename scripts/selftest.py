@@ -126,7 +126,8 @@ MAPPED.update({
                  "tests/test_providers.py::test_consent_is_single_use"),
     "SEC-SECRET": py("tests/test_providers.py::test_secrets_are_redacted_before_the_preview",
                      "tests/test_providers.py::test_api_key_is_not_in_the_preview"),
-    "AI-01": ([PY, "-m", "paperfamiliar", "providers"], [], "provider probe"),
+    "AI-01": py("tests/test_providers.py::test_core_product_is_complete_without_any_model",
+               "tests/test_providers.py::test_no_request_before_consent"),
     "AI-02": py("tests/test_providers.py::test_consent_sends_exactly_the_previewed_payload"),
     "STYLE-03": py("tests/test_api.py::test_demo_persists_survives_restart_and_export_is_immutable",
                    "tests/test_security.py::test_scanner_never_writes_next_to_source"),
@@ -137,8 +138,6 @@ MAPPED.update({
                   "tests/test_strict_offline.py::test_provider_probe_is_loopback_only"),
     # G5
     "OPS-01": ([PY, "-m", "build", "--wheel"], [], "wheel build"),
-    "QA-01": ([PY, "-c", "import sys; sys.exit(1)"], [], "requires Muse; blocked by design"),
-    "QA-02": ([PY, "-c", "import sys; sys.exit(1)"], [], "requires Muse; blocked by design"),
     "SEC-PUBLISH": ([PY, "scripts/secret_scan.py"], [], "secret and privacy scan"),
     "OPS-COMPAT": py("tests/test_scanner.py", "tests/test_api.py",
                      "tests/test_providers.py", "tests/test_security.py",
@@ -147,6 +146,7 @@ MAPPED.update({
 
 # ids that only Muse or the user can decide
 MANUAL = {"USER-01"}
+MUSE_ONLY = {"QA-01", "QA-02"}
 
 
 def main() -> int:
@@ -163,24 +163,89 @@ def main() -> int:
     sha = subprocess.run(["git", "rev-parse", "HEAD"], cwd=ROOT, capture_output=True,
                          text=True).stdout.strip()
 
+    # run the live-server probes once per invocation and reuse the results
+    g1_results: dict[str, dict] | None = None
+
+    def g1_probe() -> dict[str, dict]:
+        nonlocal g1_results
+        if g1_results is None:
+            run_cmd([PY, "scripts/g1_check.py"], ev_dir / f"g1_check-{run_id}.log")
+            probe_root = ROOT / "qa" / "evidence" / "G1" / "host-local"
+            candidates = sorted(probe_root.glob("g1-check-*.json"),
+                                key=lambda p: p.stat().st_mtime)
+            latest = (json.loads(candidates[-1].read_text(encoding="utf-8"))
+                      if candidates else {})
+            rel = (ev_dir / f"g1_check-{run_id}.log").relative_to(ROOT).as_posix()
+            g1_results = {
+                check["id"]: {"status": check["status"], "observed": check["observed"],
+                              "log": rel, "code": 0 if check["status"] == "PASS" else 1}
+                for check in latest.get("checks", [])
+            }
+        return g1_results
+
     checks = []
     commands = []
+
+    def note_log(cid: str, text: str) -> str:
+        path = ev_dir / f"{cid.lower()}-{run_id}.note.log"
+        path.write_text(text, encoding="utf-8")
+        return path.relative_to(ROOT).as_posix()
+
     for row in rows:
         cid = row["id"]
+        if cid in MUSE_ONLY:
+            note = note_log(cid, f"{cid} is reserved for independent Muse execution.\n"
+                                 "The implementer records BLOCKED and must never self-attest "
+                                 "this check.\n")
+            checks.append({
+                "id": cid, "status": "BLOCKED", "expected": row["assertion"],
+                "observed": "independent QA can only be recorded by Muse; the implementer "
+                            "leaves this blocked and must not self-attest it",
+                "platforms_tested": [PLATFORM_ID], "browsers_tested": [],
+                "evidence_paths": [note],
+            })
+            print(f"BLOCKED {cid:14} (Muse only)")
+            continue
         if cid in MANUAL:
+            note = note_log(cid, f"{cid} is the product owner's own judgment.\n"
+                                 "Neither the implementer nor Muse may sign for the author.\n")
             checks.append({
                 "id": cid, "status": "UNTESTED", "expected": row["assertion"],
                 "observed": "reserved for the product owner's own signature; "
                             "the implementer cannot test this",
-                "platforms_tested": [PLATFORM_ID], "browsers_tested": [], "evidence_paths": [],
+                "platforms_tested": [PLATFORM_ID], "browsers_tested": [],
+                "evidence_paths": [note],
             })
+            print(f"UNTESTED {cid:12} (user only)")
+            continue
+        if cid in ("WEB-SERVE", "WEB-STATE-BOOT", "WEB-PORT", "WEB-NOPLATFORM"):
+            probe = g1_probe().get(cid)
+            if probe is None:
+                checks.append({"id": cid, "status": "FAIL", "expected": row["assertion"],
+                               "observed": "g1_check produced no record for this id",
+                               "platforms_tested": [PLATFORM_ID], "browsers_tested": [],
+                               "evidence_paths": [f"qa/evidence/{args.gate}/host-local/"
+                                                  f"g1_check-{run_id}.log"]})
+                continue
+            checks.append({
+                "id": cid, "status": probe["status"], "expected": row["assertion"],
+                "observed": probe["observed"], "platforms_tested": [PLATFORM_ID],
+                "browsers_tested": ["chromium"], "evidence_paths": [probe["log"]],
+            })
+            commands.append({"command": f"scripts/g1_check.py (shared probe for {cid})",
+                             "exit_code": probe["code"], "platform": PLATFORM_ID,
+                             "log_path": probe["log"]})
+            print(f"{probe['status']:4}  {cid:14} g1_check")
             continue
         mapped = MAPPED.get(cid)
         if mapped is None:
+            note = note_log(cid, f"{cid} has no implementer-side procedure yet.\n"
+                                 "Muse must define and run it independently.\n")
             checks.append({
                 "id": cid, "status": "UNTESTED", "expected": row["assertion"],
                 "observed": "no mapping in selftest.py; Muse must define the procedure",
-                "platforms_tested": [PLATFORM_ID], "browsers_tested": [], "evidence_paths": [],
+                "platforms_tested": [PLATFORM_ID], "browsers_tested": [],
+                "evidence_paths": [note],
             })
             continue
         cmd, browsers, note = mapped

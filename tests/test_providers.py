@@ -141,3 +141,47 @@ def test_api_key_is_not_in_the_preview(monkeypatch, server):
     preview = store.preview("task", "text", config)
     assert "secret-value" not in json.dumps(preview)
     assert providers.status()["cloud"]["key_present"] is True
+
+
+def test_core_product_is_complete_without_any_model(tmp_path, monkeypatch):
+    """AI-01 fallback: with no local model and no cloud config, the full golden
+    path (demo -> audit -> decision -> style -> navigator -> export) works and
+    the UI is told the model is unavailable rather than silently broken."""
+    monkeypatch.setattr(providers, "probe_local",
+                        lambda timeout=0.8: {"status": "unavailable", "models": [],
+                                             "endpoint": "http://127.0.0.1:1",
+                                             "detail": "UnitTest"})
+    from fastapi.testclient import TestClient
+
+    from paperfamiliar.api import create_app
+    from paperfamiliar.storage import Store
+
+    app = create_app(Store(tmp_path / "data"))
+    client = TestClient(app, base_url="http://127.0.0.1:8420")
+    headers = {"X-PF-CSRF": app.state.csrf}
+
+    status = client.get("/api/providers").json()
+    assert status["local"]["status"] == "unavailable"
+    assert status["cloud"]["configured"] is False
+
+    run = client.post("/api/demo", json={}, headers=headers).json()
+    ws = run["workspace_id"]
+    assert len(run["findings"]) >= 4 and run["style"]["baseline"]["status"] == "ok"
+    client.post(f"/api/workspace/{ws}/decision",
+                json={"finding_id": run["findings"][0]["id"], "decision": "dismissed"},
+                headers=headers)
+    nav = client.post(f"/api/workspace/{ws}/navigate",
+                      json={"query": "evaluation"}, headers=headers).json()
+    assert nav["status"] == "found"
+    exported = client.post(f"/api/workspace/{ws}/export", json={}, headers=headers).json()
+    assert "report.json" in exported["files"]
+
+    preview = client.post("/api/providers/preview",
+                          json={"task": "t", "text": "some excerpt", "provider": "local"},
+                          headers=headers).json()
+    sent = client.post("/api/providers/send",
+                       json={"consent_id": preview["consent_id"], "task": "t",
+                             "text": "some excerpt", "provider": "local", "confirm": True},
+                       headers=headers).json()
+    assert sent["status"] == "unavailable"
+    assert sent.get("candidate_only") in (True, None)

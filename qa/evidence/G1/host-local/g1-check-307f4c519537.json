@@ -1,0 +1,111 @@
+{
+  "generated_at": "2026-10-28T16:22:35.327157+00:00",
+  "run_id": "307f4c519537",
+  "environment": {
+    "os": "Windows",
+    "release": "11",
+    "machine": "AMD64",
+    "python": "3.13.9",
+    "host": "local real machine (not a container)"
+  },
+  "commit_sha": "c91766a079fd103cd1f52f7a660d71507bce8f5e",
+  "wheel": null,
+  "kind": "IMPLEMENTER_SELF_TEST (not a Muse verdict)",
+  "checks": [
+    {
+      "id": "WEB-SERVE",
+      "status": "PASS",
+      "expected": "a single local Python server answers /api/health on 127.0.0.1",
+      "observed": "HTTP 200 {'status': 'ok', 'version': '0.1.0', 'mode': 'offline', 'bound': '127.0.0.1:63606', 'csrf': True}",
+      "evidence": [
+        "qa/evidence/G1/host-local/serve-307f4c519537.log",
+        "qa/evidence/G1/host-local/port-conflict-307f4c519537.log",
+        "qa/evidence/G1/host-local/restart-307f4c519537.log"
+      ]
+    },
+    {
+      "id": "WEB-NOPLATFORM",
+      "status": "PASS",
+      "expected": "the UI is served same-origin by the Python process; no native GUI or dev server",
+      "observed": "GET / HTTP 200; csrf injected=True; assets referenced=True",
+      "evidence": [
+        "qa/evidence/G1/host-local/serve-307f4c519537.log",
+        "qa/evidence/G1/host-local/port-conflict-307f4c519537.log",
+        "qa/evidence/G1/host-local/restart-307f4c519537.log"
+      ]
+    },
+    {
+      "id": "OFF-01",
+      "status": "PASS",
+      "expected": "with no network, no API key and no model, the demo audit returns the planted defects",
+      "observed": "POST /api/demo HTTP 200, 5 findings",
+      "evidence": [
+        "qa/evidence/G1/host-local/serve-307f4c519537.log",
+        "qa/evidence/G1/host-local/port-conflict-307f4c519537.log",
+        "qa/evidence/G1/host-local/restart-307f4c519537.log"
+      ]
+    },
+    {
+      "id": "WEB-HOST",
+      "status": "PASS",
+      "expected": "a foreign Host header is rejected",
+      "observed": "Host: attacker.example -> HTTP 400",
+      "evidence": [
+        "qa/evidence/G1/host-local/serve-307f4c519537.log",
+        "qa/evidence/G1/host-local/port-conflict-307f4c519537.log",
+        "qa/evidence/G1/host-local/restart-307f4c519537.log"
+      ]
+    },
+    {
+      "id": "WEB-CSRF",
+      "status": "PASS",
+      "expected": "mutations without the session token, or from another origin, are refused",
+      "observed": "no-token POST -> 403, cross-origin POST -> 403",
+      "evidence": [
+        "qa/evidence/G1/host-local/serve-307f4c519537.log",
+        "qa/evidence/G1/host-local/port-conflict-307f4c519537.log",
+        "qa/evidence/G1/host-local/restart-307f4c519537.log"
+      ]
+    },
+    {
+      "id": "WEB-PORT",
+      "status": "PASS",
+      "expected": "a busy port exits with a clear diagnostic and never falls back to another bind",
+      "observed": "exit 7, message present=True",
+      "evidence": [
+        "qa/evidence/G1/host-local/serve-307f4c519537.log",
+        "qa/evidence/G1/host-local/port-conflict-307f4c519537.log",
+        "qa/evidence/G1/host-local/restart-307f4c519537.log"
+      ]
+    },
+    {
+      "id": "WEB-STATE-BOOT",
+      "status": "PASS",
+      "expected": "a decision made before the restart is still there after the restart",
+      "observed": "GET workspace HTTP 200, decision=accepted",
+      "evidence": [
+        "qa/evidence/G1/host-local/serve-307f4c519537.log",
+        "qa/evidence/G1/host-local/port-conflict-307f4c519537.log",
+        "qa/evidence/G1/host-local/restart-307f4c519537.log"
+      ]
+    }
+  ],
+  "executed_commands": [
+    {
+      "command": "paperfamiliar serve --no-browser --port 63606",
+      "exit_code": 0,
+      "log_path": "qa/evidence/G1/host-local/serve-307f4c519537.log"
+    },
+    {
+      "command": "paperfamiliar serve --port 63675 (already in use)",
+      "exit_code": 7,
+      "log_path": "qa/evidence/G1/host-local/port-conflict-307f4c519537.log"
+    },
+    {
+      "command": "restart the same server",
+      "exit_code": 0,
+      "log_path": "qa/evidence/G1/host-local/restart-307f4c519537.log"
+    }
+  ],
+  "summary": "7/7 checks passed"
+}

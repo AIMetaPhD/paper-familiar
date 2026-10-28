@@ -292,3 +292,28 @@ def test_screenshot_baseline(browser, server, tmp_path):
             pytest.xfail(f"visual drift on {engine}; compare demo-workbench.diff.png")
     finally:
         page.close()
+
+
+def test_drift_cards_show_axes_and_jump_to_source(browser, server):
+    base, _port, _log = server
+    page = _open_demo(browser, base)
+    try:
+        page.locator(".right-tabs button", has_text="Style").click()
+        observed = page.locator(".drift-card:not(.muted)")
+        observed.first.wait_for(timeout=15000)
+        first = observed.first
+        assert "sent" in first.locator(".sample").inner_text()
+        assert "confidence" in first.locator(".sample").inner_text()
+        assert first.locator("table").count() == 1
+        location = first.locator(".location").inner_text()
+        first.locator(".location").click()
+        page.wait_for_selector(".src-line.active", timeout=15000)
+        assert page.locator(".src-line.active").get_attribute("data-line") == \
+            location.rsplit(":", 2)[1]
+        # every card carries the honesty note and no score-like language
+        text = page.locator(".style-pane").inner_text().lower()
+        assert "not a quality judgement" in text
+        for banned in ("98%", "similarity score", "authorship prob"):
+            assert banned not in text
+    finally:
+        page.close()

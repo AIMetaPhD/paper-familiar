@@ -1,0 +1,203 @@
+{
+  "kind": "IMPLEMENTER_SELF_TEST",
+  "warning": "Not a Muse verdict; cannot unlock any gate by itself.",
+  "gate": "G1",
+  "run_id": "b79149df4372",
+  "commit_sha": "c91766a079fd103cd1f52f7a660d71507bce8f5e",
+  "generated_at": "2026-10-28T16:25:40.938414+00:00",
+  "environment_fingerprint": "Windows-11-AMD64-py3.13.9",
+  "platform": "windows11_x64",
+  "checks": [
+    {
+      "id": "OFF-01",
+      "status": "PASS",
+      "expected": "Without network/API keys/model: local browser opens Demo -> audit -> source jump -> export",
+      "observed": "pytest: exit 0 on Windows AMD64",
+      "platforms_tested": [
+        "windows11_x64"
+      ],
+      "browsers_tested": [],
+      "evidence_paths": [
+        "qa/evidence/G1/host-local/off-01-b79149df4372.log"
+      ]
+    },
+    {
+      "id": "WEB-SERVE",
+      "status": "PASS",
+      "expected": "One local Python FastAPI server on 127.0.0.1:8420; no SaaS login",
+      "observed": "HTTP 200 {'status': 'ok', 'version': '0.1.0', 'mode': 'offline', 'bound': '127.0.0.1:63606', 'csrf': True}",
+      "platforms_tested": [
+        "windows11_x64"
+      ],
+      "browsers_tested": [
+        "chromium"
+      ],
+      "evidence_paths": [
+        "qa/evidence/G1/host-local/g1_check-b79149df4372.log"
+      ]
+    },
+    {
+      "id": "WEB-PACK",
+      "status": "PASS",
+      "expected": "Built Python wheel includes React static assets; Node/Vite not required at runtime",
+      "observed": "wheel contents: exit 0 on Windows AMD64",
+      "platforms_tested": [
+        "windows11_x64"
+      ],
+      "browsers_tested": [],
+      "evidence_paths": [
+        "qa/evidence/G1/host-local/web-pack-b79149df4372.log"
+      ]
+    },
+    {
+      "id": "WEB-UI-SMOKE",
+      "status": "PASS",
+      "expected": "Basic UI startup + Paper Map + Issue Ledger across three Playwright browser engines",
+      "observed": "pytest: exit 0 on Windows AMD64",
+      "platforms_tested": [
+        "windows11_x64"
+      ],
+      "browsers_tested": [
+        "chromium",
+        "firefox",
+        "webkit"
+      ],
+      "evidence_paths": [
+        "qa/evidence/G1/host-local/web-ui-smoke-b79149df4372.log"
+      ]
+    },
+    {
+      "id": "WEB-NOPLATFORM",
+      "status": "PASS",
+      "expected": "No Windows/macOS native GUI, Electron/Tauri/desktop installers in required runtime",
+      "observed": "GET / HTTP 200; csrf injected=True; assets referenced=True",
+      "platforms_tested": [
+        "windows11_x64"
+      ],
+      "browsers_tested": [
+        "chromium"
+      ],
+      "evidence_paths": [
+        "qa/evidence/G1/host-local/g1_check-b79149df4372.log"
+      ]
+    },
+    {
+      "id": "WEB-STATE-BOOT",
+      "status": "PASS",
+      "expected": "Uploaded demo and decisions survive refresh, browser reopen, server restart",
+      "observed": "GET workspace HTTP 200, decision=accepted",
+      "platforms_tested": [
+        "windows11_x64"
+      ],
+      "browsers_tested": [
+        "chromium"
+      ],
+      "evidence_paths": [
+        "qa/evidence/G1/host-local/g1_check-b79149df4372.log"
+      ]
+    },
+    {
+      "id": "UX-01",
+      "status": "PASS",
+      "expected": "Paper Map -> issue click -> exact LaTeX source span -> evidence -> export",
+      "observed": "pytest: exit 0 on Windows AMD64",
+      "platforms_tested": [
+        "windows11_x64"
+      ],
+      "browsers_tested": [
+        "chromium",
+        "firefox",
+        "webkit"
+      ],
+      "evidence_paths": [
+        "qa/evidence/G1/host-local/ux-01-b79149df4372.log"
+      ]
+    },
+    {
+      "id": "OS-PATH-01",
+      "status": "PASS",
+      "expected": "Unicode + spaces paths, CRLF/LF and multi input have stable relative file/line/col",
+      "observed": "pytest: exit 0 on Windows AMD64",
+      "platforms_tested": [
+        "windows11_x64"
+      ],
+      "browsers_tested": [],
+      "evidence_paths": [
+        "qa/evidence/G1/host-local/os-path-01-b79149df4372.log"
+      ]
+    },
+    {
+      "id": "WEB-PORT",
+      "status": "PASS",
+      "expected": "Port conflict clearly diagnosed; no fallback to 0.0.0.0/public bind",
+      "observed": "exit 7, message present=True",
+      "platforms_tested": [
+        "windows11_x64"
+      ],
+      "browsers_tested": [
+        "chromium"
+      ],
+      "evidence_paths": [
+        "qa/evidence/G1/host-local/g1_check-b79149df4372.log"
+      ]
+    }
+  ],
+  "executed_commands": [
+    {
+      "command": "E:\\ClaudeCodeFiles\\MyProducts\\PaperFamiliar\\paper-familiar\\.venv\\Scripts\\python.exe -m pytest -q tests/test_strict_offline.py tests/test_api.py::test_demo_persists_survives_restart_and_export_is_immutable",
+      "exit_code": 0,
+      "platform": "windows11_x64",
+      "log_path": "qa/evidence/G1/host-local/off-01-b79149df4372.log"
+    },
+    {
+      "command": "scripts/g1_check.py (shared probe for WEB-SERVE)",
+      "exit_code": 0,
+      "platform": "windows11_x64",
+      "log_path": "qa/evidence/G1/host-local/g1_check-b79149df4372.log"
+    },
+    {
+      "command": "E:\\ClaudeCodeFiles\\MyProducts\\PaperFamiliar\\paper-familiar\\.venv\\Scripts\\python.exe -c import zipfile,sys;w=zipfile.ZipFile('dist/paperfamiliar-0.1.0-py3-none-any.whl');names=w.namelist();sys.exit(0 if any('web/dist/index.html' in n for n in names) and any('/demo/' in n for n in names) else 1)",
+      "exit_code": 0,
+      "platform": "windows11_x64",
+      "log_path": "qa/evidence/G1/host-local/web-pack-b79149df4372.log"
+    },
+    {
+      "command": "E:\\ClaudeCodeFiles\\MyProducts\\PaperFamiliar\\paper-familiar\\.venv\\Scripts\\python.exe -m pytest -q tests/e2e/test_browser.py",
+      "exit_code": 0,
+      "platform": "windows11_x64",
+      "log_path": "qa/evidence/G1/host-local/web-ui-smoke-b79149df4372.log"
+    },
+    {
+      "command": "scripts/g1_check.py (shared probe for WEB-NOPLATFORM)",
+      "exit_code": 0,
+      "platform": "windows11_x64",
+      "log_path": "qa/evidence/G1/host-local/g1_check-b79149df4372.log"
+    },
+    {
+      "command": "scripts/g1_check.py (shared probe for WEB-STATE-BOOT)",
+      "exit_code": 0,
+      "platform": "windows11_x64",
+      "log_path": "qa/evidence/G1/host-local/g1_check-b79149df4372.log"
+    },
+    {
+      "command": "E:\\ClaudeCodeFiles\\MyProducts\\PaperFamiliar\\paper-familiar\\.venv\\Scripts\\python.exe -m pytest -q tests/e2e/test_browser.py::test_demo_loads_and_clicking_a_finding_jumps_to_source",
+      "exit_code": 0,
+      "platform": "windows11_x64",
+      "log_path": "qa/evidence/G1/host-local/ux-01-b79149df4372.log"
+    },
+    {
+      "command": "E:\\ClaudeCodeFiles\\MyProducts\\PaperFamiliar\\paper-familiar\\.venv\\Scripts\\python.exe -m pytest -q tests/test_scanner.py tests/test_api.py::test_upload_from_browser_multiples",
+      "exit_code": 0,
+      "platform": "windows11_x64",
+      "log_path": "qa/evidence/G1/host-local/os-path-01-b79149df4372.log"
+    },
+    {
+      "command": "scripts/g1_check.py (shared probe for WEB-PORT)",
+      "exit_code": 0,
+      "platform": "windows11_x64",
+      "log_path": "qa/evidence/G1/host-local/g1_check-b79149df4372.log"
+    }
+  ],
+  "passed": 9,
+  "total": 9
+}
