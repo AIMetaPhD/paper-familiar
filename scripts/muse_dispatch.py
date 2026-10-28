@@ -31,49 +31,56 @@ INSTRUCTIONS = """PaperFamiliar independent QA request, gate {gate}.
 
 You are the independent black-box QA for this project. Judge only by your own
 execution on the exact commit named below; the implementer's self-test files
-are reference material, not your evidence.
+under qa/evidence are reference material, not your evidence.
 
-Repository (same machine, read it directly):
+Repository location: the workstation you already SSH into with your normal
+account, path:
     {repo}
-Commit to verify (check out or verify HEAD equals this SHA before testing):
+If that path is not reachable for you, record every affected check as BLOCKED
+with the exact reason; do not substitute guesses.
+
+Commit under test:
     {sha}
 Handoff record with the check list, expected behavior and evidence paths:
     qa/handoff-{gate}.json
 
 What to do:
-1. Verify the product under test. The commit above must exist, and the product
-   code must be unchanged up to HEAD: run
-       git cat-file -e {sha} && git diff {sha} HEAD -- src web fixtures demo
-   the diff must be empty (only qa/ evidence and docs may differ after it).
-   Check out {sha} (detached) for the actual testing if you want strictness.
-2. Create a fresh virtualenv outside the repository, install the project from
-   source (pip install -e . or build a wheel and install it), and follow the
-   reproduce commands in each check of the handoff file.
-3. Run every listed check. For UI checks use Playwright with chromium, firefox
-   and webkit as the handoff requires. Record exact commands, exit codes,
-   versions and where logs/screenshots live.
-4. Attack the same surfaces from your side with your own mutated variants of
-   the synthetic fixtures under fixtures/ (do not trust the provided negative
-   cases alone). Never send real user text anywhere; everything here is
-   synthetic.
+1. Verify the product under test:
+       git -C <repo> cat-file -e {sha}
+       git -C <repo> diff {sha} HEAD -- src web fixtures demo   (must be empty)
+   Prefer testing from a clean checkout of {sha} (git worktree add elsewhere).
+2. Create a fresh virtualenv OUTSIDE the repository, install the project from
+   that checkout (pip install -e . or build the wheel and install it), and
+   follow each check's reproduce procedure from the handoff file. UI checks
+   require Playwright with chromium, firefox and webkit
+   (pip install playwright; playwright install chromium firefox webkit).
+   Keep your venv, caches and downloads outside the repository directory.
+3. Run every check id in the handoff. Record exact commands, exit codes,
+   versions and where your logs/screenshots live.
+4. Attack the same surfaces with your OWN mutated variants of the synthetic
+   fixtures under fixtures/ (do not trust the provided negative cases alone).
+   Everything here is synthetic; never place any real manuscript anywhere.
 5. Write your verdict to:
        {repo}/qa/muse-verdict-{gate}.json
    following schemas/qa-verdict.schema.json exactly (schema_version 1.2,
-   status one of VERIFIED / FAILED / BLOCKED / MUSE_UNAVAILABLE,
-   tester_identity like "muse-N", tester_origin "independent_muse",
-   independent_run_proof_path and report_path pointing at real files you
-   produced, commit_sha equal to the SHA above, failed_gates listing every
-   check id that is not PASS).
-6. Also write a short human report at qa/muse-report-{gate}.md.
+   status VERIFIED | FAILED | BLOCKED | MUSE_UNAVAILABLE, tester_identity
+   "muse-N", tester_origin "independent_muse", commit_sha {sha}, run_id
+   copied from the handoff, independent_run_proof_path and report_path
+   pointing at real files you produced, failed_gates listing every check id
+   that is not PASS).
+6. Write a human report at qa/muse-report-{gate}.md (commands, environments,
+   findings, reproduction of any failure).
+7. Do NOT run git commit or git push; the implementer integrates and commits
+   evidence after reviewing it. Then return your queue result with
+   status=success/failure and evidence {{"gate": "{gate}", "verdict_file":
+   "qa/muse-verdict-{gate}.json", "summary": "..."}}.
 
 Hard rules:
-- Do not modify product source code, fixtures, or the handoff file.
-- Do not run any TeX engine on fixture files; the product must not either.
-- If a platform, browser engine, or permission is unavailable to you, record
-  that check as BLOCKED with the reason instead of guessing.
-- If you cannot verify the commit matches, stop and record BLOCKED.
-- Your identity is your own; never copy numbers or wording from the
-  implementer's selftest JSON into your verdict without running it yourself.
+- Do not modify product source code, fixtures, demo, or the handoff file.
+- Never run a TeX engine on any file; the product must not either.
+- Missing platform, engine, or permission => BLOCKED with reason, not guessed.
+- Your verdict must come from what YOU executed. Never copy wording or numbers
+  from the implementer's selftest JSON without running it yourself.
 """
 
 

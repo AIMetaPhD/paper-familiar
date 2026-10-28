@@ -1,0 +1,23 @@
+{
+  "generated_at": "2026-10-28T17:06:11.122569+00:00",
+  "endpoint": "http://127.0.0.1:11434/v1",
+  "requested_model": "qwen3.5:9b",
+  "probe": {
+    "status": "available",
+    "models": [
+      "qwen3.8:27b",
+      "qwen3:14b",
+      "qwen3.5:9b"
+    ],
+    "endpoint": "http://127.0.0.1:11434"
+  },
+  "kind": "IMPLEMENTER_SELF_TEST (not a Muse verdict)",
+  "mode": "real_local_model",
+  "model": "qwen3.5:9b",
+  "preview_bytes": 922,
+  "estimated_tokens": 231,
+  "redactions": 0,
+  "elapsed_seconds": 107.3,
+  "result_status": "candidate",
+  "candidate_output_excerpt": "1. Undefined technical term: \"four nodes with shaped links.\"\n2. Undefined mechanism name: \"The reuse-aware rule reduces transfer volume\"\n3. Unclear logical connection between cited work and current model: \"which justifies our reuse model.\"\n4. Meta-commentary disrupting scientific context: \"This claim is intentionally misattributed in this synthetic fixture.\"\n5. Undefined variables without prior definition: \"We also observe that the threshold is sensitive to the recomputation estimate.\""
+}

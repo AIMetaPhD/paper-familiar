@@ -25,6 +25,12 @@ sys.path.insert(0, str(ROOT))
 from paperfamiliar.fingerprint import split_sentences  # noqa: E402  (import check)
 
 
+def ev_dir_for(gate: str) -> Path:
+    path = ROOT / "qa" / "evidence" / gate / "host-local"
+    path.mkdir(parents=True, exist_ok=True)
+    return path
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--gate", required=True, choices=[f"G{i}" for i in range(1, 6)])
@@ -46,9 +52,21 @@ def main() -> int:
         return 2
     sha = subprocess.run(["git", "rev-parse", "HEAD"], cwd=ROOT, capture_output=True,
                          text=True).stdout.strip()
-    if self_doc["commit_sha"] != sha:
-        print(f"error: selftest was recorded at {self_doc['commit_sha']} but HEAD is {sha}.\n"
-              "Re-run the selftest against the commit you intend to submit.", file=sys.stderr)
+    code_sha = self_doc["commit_sha"]
+    # Evidence/doc commits legitimately land after the tested code commit; the
+    # product tree must not have changed. Anything under src/web/fixtures/demo
+    # differing invalidates the selftest.
+    diff = subprocess.run(["git", "diff", "--name-only", code_sha, "HEAD", "--",
+                           "src", "web", "fixtures", "demo"],
+                          cwd=ROOT, capture_output=True, text=True).stdout.strip()
+    if diff:
+        print(f"error: product files changed since the selftest ran at {code_sha}:\n{diff}\n"
+              "Re-run scripts/selftest.py against the current tree.", file=sys.stderr)
+        return 2
+    exists = subprocess.run(["git", "cat-file", "-e", f"{code_sha}^{{commit}}"],
+                            cwd=ROOT).returncode
+    if exists != 0:
+        print(f"error: selftest commit {code_sha} does not exist in history", file=sys.stderr)
         return 2
 
     # keep the isolation proof referenced by every gate as a real, growing log
@@ -80,7 +98,7 @@ def main() -> int:
     doc = {
         "schema_version": "1.2",
         "gate": args.gate,
-        "commit_sha": sha,
+        "commit_sha": code_sha,
         "run_id": self_doc["run_id"],
         "created_at": datetime.now(timezone.utc).isoformat(),
         "status": "SUBMITTED",
@@ -95,16 +113,23 @@ def main() -> int:
         "failed_gates": open_ids,
         "evidence_paths": evidence,
         "network_isolation_proof": args.isolation_log,
-        "notes": [
-            "This is the implementer's submission. The statuses above are self-test "
-            "observations, not independent verification.",
-            "Muse must re-run every check on this commit_sha in its own environment and "
-            "produce qa/muse-verdict-%s.json. Do not reuse this run_id if the commit changes."
-            % args.gate,
-            "failed_gates lists checks that are not PASS yet; they must be tested by Muse "
-            "and are expected to include anything only a human or Muse can decide.",
-        ],
     }
+    context = ev_dir_for(args.gate) / f"handoff-context-{self_doc['run_id']}.log"
+    context.write_text(
+        "Implementer submission notes (kept out of the schema-constrained JSON):\n"
+        "- commit_sha is the tested product commit; the branch may have further\n"
+        "  commits touching only qa/ and docs/. Muse must confirm\n"
+        "  `git diff <commit_sha> HEAD -- src web fixtures demo` is empty.\n"
+        "- Statuses above are implementer self-test observations, not independent\n"
+        "  verification. Muse re-runs every check on commit_sha and writes\n"
+        f"  qa/muse-verdict-{args.gate}.json itself; never copy this run's wording\n"
+        "  into a verdict without executing it.\n"
+        "- failed_gates lists checks that are not PASS here, including ones the\n"
+        "  implementer is structurally not allowed to attest (QA-01/02, USER-01).\n",
+        encoding="utf-8")
+    if context.relative_to(ROOT).as_posix() not in evidence:
+        evidence.append(context.relative_to(ROOT).as_posix())
+        doc["evidence_paths"] = sorted(set(evidence))
     out = ROOT / "qa" / f"handoff-{args.gate}.json"
     out.write_text(json.dumps(doc, indent=2, ensure_ascii=False), encoding="utf-8")
     print(f"wrote {out.relative_to(ROOT)}: {len(checks)} checks, "
