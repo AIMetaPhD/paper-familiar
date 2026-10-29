@@ -35,17 +35,20 @@ gate QA on 2026-10-29, and the queue server verifies the dispatch signature
    schema_version "1.2"): copy `gate`, `commit_sha`, `run_id` from the
    handoff; `tester_identity` = your own name (muse-1/muse-3);
    `tester_origin` = "independent_muse"; per-check `status` PASS/FAIL/
-   UNTESTED/BLOCKED with your own `observed` strings; `evidence_paths` may
-   point inside the repo at existing files, or be [] when you kept your logs
-   outside; `independent_run_proof_path` and `report_path` likewise (use "" if
-   nothing was written in-repo).
+   UNTESTED/BLOCKED with your own `observed` strings. Use exactly these two
+   field values for the path fields — the implementer's ingest step creates
+   both files from your queue result, so they will exist:
+   `report_path` = `qa/muse-report-<gate>.md`,
+   `independent_run_proof_path` = `qa/muse-verdict-<gate>.provenance.json`.
 6. Return your queue result:
    `{"status": "success", "evidence": {"gate": "<Gn>",
    "verdict": <the verdict object>,
    "verdict_sha256": "<sha256 of json.dumps(verdict, sort_keys=True,
-   separators=(',',':')) encoded UTF-8>", "summary": "<one line>"}}`
-   The implementer persists those exact bytes unedited; hash mismatches are
-   rejected loudly.
+   separators=(',',':')) encoded UTF-8>",
+   "report_markdown": "<your full human report, markdown text>",
+   "summary": "<one line>"}}`
+   The implementer persists the verdict and report byte-for-byte, computes the
+   provenance file, and never edits them; hash mismatches are rejected loudly.
 
 ## Hard rules
 

@@ -86,6 +86,18 @@ def main() -> int:
     out = ROOT / "qa" / f"muse-verdict-{args.gate}.json"
     out.write_text(json.dumps(verdict, indent=2, ensure_ascii=False) + "\n",
                    encoding="utf-8")
+    report = evidence.get("report_markdown")
+    report_path = ROOT / "qa" / f"muse-report-{args.gate}.md"
+    if isinstance(report, str) and report.strip():
+        report_path.write_text(report.rstrip() + "\n", encoding="utf-8")
+    else:
+        report_path.write_text(
+            f"# Muse report {args.gate}\n\n"
+            "Muse returned a verdict without report text. Summary line recorded\n"
+            "verbatim from the queue result; ask Muse for the full report if needed.\n\n"
+            f"summary: {evidence.get('summary', '(none)')}\n"
+            f"queue task: {args.task_id}\nclaimed_by: {args.claimed_by}\n",
+            encoding="utf-8")
     provenance = {
         "gate": args.gate,
         "task_id": args.task_id,
