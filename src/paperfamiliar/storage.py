@@ -238,6 +238,10 @@ class Store:
             "data_dir": str(self.data_dir),
             "workspaces": self.db.execute("SELECT COUNT(*) FROM workspaces").fetchone()[0],
             "runs": self.db.execute("SELECT COUNT(*) FROM runs").fetchone()[0],
+            "stored_workspaces": self.db.execute(
+                "SELECT COUNT(*) FROM workspaces WHERE stored=1").fetchone()[0],
+            "path_workspaces": self.db.execute(
+                "SELECT COUNT(*) FROM workspaces WHERE stored=0").fetchone()[0],
             "database_bytes": (self.data_dir / "paperfamiliar.sqlite3").stat().st_size
             if (self.data_dir / "paperfamiliar.sqlite3").is_file() else 0,
             "workspaces_bytes": size(self.workspaces_dir),

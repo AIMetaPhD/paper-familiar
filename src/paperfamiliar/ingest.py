@@ -121,11 +121,21 @@ def path_workspace(store: Store, source: Path, *, label: str | None = None,
 
 
 def demo_workspace(store: Store) -> Workspace:
+    """Load the bundled demo, reusing an existing demo bundle when unchanged.
+
+    Keyed by the demo's content revision id, so pressing "Reload demo" ten times
+    returns the same workspace instead of accumulating copies.
+    """
     root = demo_root()
     manifest_path = root / "manifest.json"
     if not manifest_path.is_file():
         raise StorageError("demo data is not installed; run scripts/sync_demo.py")
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    loaded = load_workspace(root / manifest["draft"])
+    for existing in store.list_workspaces():
+        if (existing.kind == "demo" and existing.revision_id == loaded.revision_id
+                and existing.root.is_dir()):
+            return existing
     record = _import_directory(store, root / manifest["draft"],
                                label=manifest.get("name", "PaperFamiliar demo"),
                                kind="demo",
@@ -149,7 +159,6 @@ def demo_workspace(store: Store) -> Workspace:
         "The demo's four reference papers are synthetic and are labelled as the demo "
         "author's own writing only to make the comparison visible. In a real workspace you "
         "mark each section yourself.")
-    run = store.load_run(record.run_id)
     run.payload["assumptions"] = assumptions
     run.payload["style"]["reference_ids"] = references
     store.save_run(run)

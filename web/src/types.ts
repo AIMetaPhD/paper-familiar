@@ -152,6 +152,8 @@ export interface Usage {
   data_dir: string;
   workspaces: number;
   runs: number;
+  stored_workspaces: number;
+  path_workspaces: number;
   database_bytes: number;
   workspaces_bytes: number;
   exports_bytes: number;

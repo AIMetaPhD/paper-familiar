@@ -530,7 +530,11 @@ function SettingsModal({
             <p className="mono small">{settings.usage.data_dir}</p>
             <ul className="privacy">
               <li>{settings.usage.workspaces} workspace(s) · {settings.usage.runs} run(s)</li>
-              <li>sources {formatBytes(settings.usage.workspaces_bytes)} · exports {formatBytes(settings.usage.exports_bytes)} · cache {formatBytes(settings.usage.cache_bytes)}</li>
+              <li>
+                stored copies {formatBytes(settings.usage.workspaces_bytes)} ({settings.usage.stored_workspaces} uploaded)
+                · exports {formatBytes(settings.usage.exports_bytes)} · cache {formatBytes(settings.usage.cache_bytes)}
+                · {settings.usage.path_workspaces} path-imported folder(s) stay where they are
+              </li>
               <li>local model: <strong>{settings.providers.local.status}</strong> · cloud: <strong>{settings.providers.cloud.configured ? "configured" : "not configured"}</strong></li>
             </ul>
             <h3 className="section-heading">Workspaces</h3>

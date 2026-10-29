@@ -201,3 +201,28 @@ def test_legacy_v11_database_migrates_without_data_loss(tmp_path):
     assert row and "runs" in row[0]
     kept = store.db.execute("SELECT decision FROM decisions_v11 WHERE finding_id='F-1'").fetchone()
     assert kept and kept[0] == "accepted"
+
+
+def test_demo_reload_reuses_the_same_workspace(tmp_path):
+    app, client = make_client(tmp_path)
+    first = client.post("/api/demo", json={}, headers=headers(app)).json()
+    second = client.post("/api/demo", json={}, headers=headers(app)).json()
+    assert first["workspace_id"] == second["workspace_id"]
+    listing = client.get("/api/workspaces").json()["workspaces"]
+    demo_rows = [row for row in listing if row["kind"] == "demo"]
+    assert len(demo_rows) == 1
+    # a decision made before the reload is still visible after it
+    fid = first["findings"][0]["id"]
+    client.post(f"/api/workspace/{first['workspace_id']}/decision",
+                json={"finding_id": fid, "decision": "accepted"}, headers=headers(app))
+    again = client.post("/api/demo", json={}, headers=headers(app)).json()
+    row = [f for f in again["findings"] if f["id"] == fid][0]
+    assert row["human_decision"] == "accepted"
+
+
+def test_usage_reports_stored_and_path_workspaces_separately(tmp_path):
+    app, client = make_client(tmp_path)
+    client.post("/api/demo", json={}, headers=headers(app))
+    usage = client.get("/api/settings").json()["usage"]
+    assert usage["stored_workspaces"] == 0  # demo is path-based, nothing copied
+    assert usage["path_workspaces"] >= 5
