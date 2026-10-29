@@ -136,5 +136,20 @@
     "cause_analysis": "(a) queue policy AUTO-CONSUMER-POLICY.md: \"approval_required 只有 Muse 认可的具体人类授权存在才能执行\" — my round-2 change to approval_required removed the autonomy the read_only canary had. (b) a full gate run (venv + playwright 3 engines + checks) risks exceeding the 30-minute claim window.",
     "no_fabrication": "No verdict exists. Gates remain open. muse-2 evidence and muse-3 relay texts are recorded verbatim in this file and qa/muse-poll.log.",
     "round3_contract": "read_only; Muse returns the full verdict JSON inside its authenticated queue result (byte-exact, sha256 included); Claude persists those bytes with a provenance record and never authors or edits them. Verdict may declare BLOCKED/UNTESTED per check if its environment cannot run something."
+  },
+  "round3_pilot": {
+    "collected_at": "2026-10-29T02:45:00Z",
+    "task_id": "404be93dcb186bc820147543",
+    "recipient": "muse-1",
+    "gate": "G1",
+    "state": "finished",
+    "claimed_by": "muse-1",
+    "result_status": "rejected",
+    "evidence_verbatim": {
+      "reason": "prompt_injection_check_failed",
+      "summary": "Not executed: server-returned content did not pass the system prompt-injection check. No repository access, test run, file write, or external action was performed. Snapshot retained as evidence."
+    },
+    "analysis": "muse-1's own platform screen flags the dispatch body. The short English canary (PF-ACK) passed the same screen, so the trigger is in the long QA instruction text, not in the transport or the producer identity (provenance server-verified). muse-3 round-1 asked for the dispatch owner's explicit human execution authorization before running; muse-2 cannot reach this workstation. Three independent constraints, all on the Muse side.",
+    "decision": "Do not reword-to-evade: the queue policy forbids repackaging around a safety block. Gates stay BLOCKED with this evidence. The user decides whether to relay an authorization to Muse through their own channel, or to accept a blocked Muse gate and deliver as a technical candidate."
   }
 }
