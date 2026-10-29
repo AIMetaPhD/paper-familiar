@@ -1,12 +1,12 @@
 {
   "gate": "G2",
-  "commit_sha": "494eaefbde3f6a5e950515bac10e3aff5903ce21",
-  "handoff_run_id": "640c1eb30e02",
-  "dispatched_at": "2026-10-28T18:18:14.013107+00:00",
+  "commit_sha": "6b07e4b546671f0d4bd790a6c85d3857e8d3b12b",
+  "handoff_run_id": "edb2d4e83561",
+  "dispatched_at": "2026-10-29T08:02:19.671840+00:00",
   "tasks": [
     {
       "recipient": "muse-1",
-      "task_id": "e22197c45fe58b94789cc4d3",
+      "task_id": "ec00a65a3f1e8e848ad01d9d",
       "state": "pending"
     }
   ],
