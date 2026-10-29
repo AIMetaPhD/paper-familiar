@@ -30,7 +30,7 @@ author's own blind sign-off are still outstanding. Nothing is published anywhere
 | Author blind evaluation (G5, `USER-01`) | reserved for you |
 | macOS / Linux | `UNTESTED_PLATFORM` — same code path, no host has run it |
 | Real cloud API | `UNTESTED_CLOUD_REAL` — consent flow proven against a mock endpoint |
-| Push / publish | not done; requires your explicit authorization |
+| Private repository | pushed to `AIMetaPhD/paper-familiar` (PRIVATE) on 2026-10-29, commit `c391414` — public visibility, Release and the AIMetaPhD list remain unauthorized |
 
 ## Requirements
 
