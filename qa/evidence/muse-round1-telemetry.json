@@ -151,5 +151,40 @@
     },
     "analysis": "muse-1's own platform screen flags the dispatch body. The short English canary (PF-ACK) passed the same screen, so the trigger is in the long QA instruction text, not in the transport or the producer identity (provenance server-verified). muse-3 round-1 asked for the dispatch owner's explicit human execution authorization before running; muse-2 cannot reach this workstation. Three independent constraints, all on the Muse side.",
     "decision": "Do not reword-to-evade: the queue policy forbids repackaging around a safety block. Gates stay BLOCKED with this evidence. The user decides whether to relay an authorization to Muse through their own channel, or to accept a blocked Muse gate and deliver as a technical candidate."
+  },
+  "round4_final": {
+    "collected_at": "2026-10-30T00:10:00Z",
+    "outcomes": [
+      {
+        "gate": "G1",
+        "recipient": "muse-1",
+        "state": "finished",
+        "result": "failure",
+        "reason": "stale_claim_recovered"
+      },
+      {
+        "gate": "G2",
+        "recipient": "muse-1",
+        "state": "pending",
+        "result": null,
+        "reason": "never claimed"
+      },
+      {
+        "gate": "G3",
+        "recipient": "muse-3",
+        "state": "finished",
+        "result": "rejected",
+        "reason": "permissions=read_only, but task requires running QA in workstation-local repo and writing (truncated; the round-4 contract returns the verdict in the queue result, not as a repo write — muse-3 still read it as requiring writes)"
+      },
+      {
+        "gate": "G4",
+        "recipient": "muse-3",
+        "state": "finished",
+        "result": "rejected",
+        "reason": "same as G3"
+      }
+    ],
+    "verdicts_produced": 0,
+    "conclusion": "MUSE_UNAVAILABLE stands. Owner selected Option B; private repo pushed. No gate claimed as passed."
   }
 }
