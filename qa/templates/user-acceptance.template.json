@@ -1,6 +1,6 @@
 {
   "schema_version": "1.2",
-  "commit_sha": "REPLACE_WITH_THE_40_HEX_SHA_YOU_TESTED",
+  "commit_sha": "6b07e4b546671f0d4bd790a6c85d3857e8d3b12b",
   "decision": "PENDING",
   "approved_at": "REPLACE_WITH_UTC_ISO_DATETIME_WHEN_YOU_DECIDE",
   "blind_test_evidence_path": "qa/evidence/G5/user/",

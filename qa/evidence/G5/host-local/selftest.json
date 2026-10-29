@@ -108,5 +108,6 @@
     }
   ],
   "passed": 3,
-  "total": 6
+  "total": 6,
+  "note": "Final state: Muse QA unavailable (MUSE_UNAVAILABLE). QA-01/02 BLOCKED by design (requires independent Muse). USER-01 reserved for product owner blind evaluation per docs/user-acceptance-guide.zh.md."
 }

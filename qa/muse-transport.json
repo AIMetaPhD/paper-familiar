@@ -2,7 +2,7 @@
   "schema_version": "1.1",
   "recorded_at": "2026-10-28T19:59:00Z",
   "recorded_by": "Claude Code (producer identity: claude)",
-  "status": "AVAILABLE_VERIFIED_ROUNDTRIP",
+  "status": "MUSE_UNAVAILABLE",
   "transport": {
     "type": "authenticated_task_queue",
     "endpoint": "http://100.111.90.123:9110",
@@ -11,7 +11,11 @@
     "invocation_template": "python queue_client.py --role producer --producer claude --method GET|POST --path <allowed path>",
     "authentication": "local-ip-and-producer-token; claude producer key read from private/credentials.json (never printed)",
     "provenance_issuer": "claude",
-    "recipients": ["muse-1", "muse-2", "muse-3"],
+    "recipients": [
+      "muse-1",
+      "muse-2",
+      "muse-3"
+    ],
     "notes": [
       "MSYS_NO_PATHCONV=1 is required in Git Bash or /health/consumers is rewritten as a Windows path.",
       "The server is single-threaded. /tasks and /tasks/pending can take 13-36 s with 100 stored tasks; short client timeouts (15 s) time out even when the server is healthy.",
@@ -19,10 +23,26 @@
     ]
   },
   "discovery": [
-    {"probe": "command -v muse; Get-Command muse", "result": "no Muse CLI on PATH", "evidence": "terminal output, 2026-10-28"},
-    {"probe": "MCP servers in ~/.claude.json and project configs", "result": "no Muse MCP server; global mcpServers = [rube], project-only context7/telegram", "evidence": "~/.claude.json"},
-    {"probe": "existing project records", "result": "F:\\Applications\\Documents\\Workspace\\projects\\muse-queue documents the real transport; AgentFirstPaperWorkflow .dispatch scripts use it", "evidence": "muse-queue/README.md, .dispatch/dispatch.py"},
-    {"probe": "GET /health/consumers", "result": "HTTP 200; muse-1, muse-2, muse-3 all authenticated and polling within the last 60 s", "evidence": "qa/evidence/p0/muse-health.json"}
+    {
+      "probe": "command -v muse; Get-Command muse",
+      "result": "no Muse CLI on PATH",
+      "evidence": "terminal output, 2026-10-28"
+    },
+    {
+      "probe": "MCP servers in ~/.claude.json and project configs",
+      "result": "no Muse MCP server; global mcpServers = [rube], project-only context7/telegram",
+      "evidence": "~/.claude.json"
+    },
+    {
+      "probe": "existing project records",
+      "result": "F:\\Applications\\Documents\\Workspace\\projects\\muse-queue documents the real transport; AgentFirstPaperWorkflow .dispatch scripts use it",
+      "evidence": "muse-queue/README.md, .dispatch/dispatch.py"
+    },
+    {
+      "probe": "GET /health/consumers",
+      "result": "HTTP 200; muse-1, muse-2, muse-3 all authenticated and polling within the last 60 s",
+      "evidence": "qa/evidence/p0/muse-health.json"
+    }
   ],
   "canaries": [
     {
@@ -57,16 +77,20 @@
       "state": "finished",
       "claimed_by": "muse-1",
       "result_status": "success",
-      "evidence": {"ack": "PF-ACK-20261028", "agent": "muse-1"},
+      "evidence": {
+        "ack": "PF-ACK-20261028",
+        "agent": "muse-1"
+      },
       "evidence_path": "qa/evidence/p0/muse-canary-success.json",
       "interpretation": "End-to-end round trip proven: Claude produced a task with the claude producer identity, muse-1 independently claimed and completed it, and the exact requested nonce came back. The channel is usable for gate handoffs. English, safety-neutral wording avoids muse-1's prompt-injection screen (Chinese task text triggered it twice; this is the operational rule for future handoffs)."
     }
   ],
   "gate_implications": {
-    "independent_qa_possible": true,
+    "independent_qa_possible": false,
     "verified_by_claude": false,
-    "statement": "A real, independent Muse channel exists and is reachable. No gate may be marked VERIFIED until Muse returns a verdict JSON on the same commit. Claude's own tests are always labelled self-test.",
-    "reliability_risk": "Queue latency and occasional non-response require retries and generous timeouts; a timeout is recorded as a transport observation, not as a Muse verdict."
+    "statement": "Muse transport works (canary PF-ACK-20261028 succeeded), but all three agents block gate dispatches under their platform rules: muse-1 rejects long instruction text (prompt_injection_check_failed); muse-3 requires explicit human authorization relay; muse-2 has no network path to this repository. Per queue policy (AUTO-CONSUMER-POLICY.md) the block is reported, not repackaged around. Gates remain BLOCKED for independent QA. Product owner chose Option B: deliver as technical candidate with honest MUSE_UNAVAILABLE status.",
+    "reliability_risk": "Queue latency and occasional non-response require retries and generous timeouts; a timeout is recorded as a transport observation, not as a Muse verdict.",
+    "muse_round_status": "Round-4 tasks still pending/claimed-stale in queue; independent QA unavailable. See qa/muse-poll.log for live status."
   },
   "privacy": {
     "tokens_printed": false,

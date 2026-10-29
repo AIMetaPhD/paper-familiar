@@ -6,7 +6,7 @@
   tree-diff check). Selftests G1 9/9, G2 12/12, G3 8/8, G4 12/12, G5 3/6 all
   bind this SHA; handoff files pin it. Regenerate with
   `scripts/final_gate_run.py` after any code change.
-- **Status: NOT ACCEPTED.** Implementer self-tests pass on this host; the
+- **Status: TECHNICAL CANDIDATE (MUSE_UNAVAILABLE).** Implementer self-tests pass on this host; the
   independent Muse verdicts and the product owner's own signature are missing.
   No gate is claimed as passed.
 
@@ -23,7 +23,7 @@
 `python scripts/check_gates.py --root .` exits **2** — correct, because no
 `qa/muse-verdict-*.json` exists. That file may only be produced by Muse.
 
-## Why Muse has no verdict (three rounds of real evidence)
+## Why Muse QA is MUSE_UNAVAILABLE (three rounds of real evidence)
 
 Full verbatim records: `qa/evidence/muse-round1-telemetry.json`, `qa/muse-poll.log`,
 per-gate `qa/muse-dispatch-G*.json`.
@@ -59,7 +59,7 @@ would unblock, in the owner's hands only:
   candidate** (`MUSE_UNAVAILABLE` recorded), with the independent-QA claim
   explicitly absent; then run the author's own G5 blind evaluation.
 
-## What is genuinely proven on this host
+## What is genuinely proven on this host (self-verified)
 
 - 58 unit/API/offline tests passing (parser, rules, quote gate, archives,
   injection, providers, consent, persistence, deletion, legacy migration).
@@ -73,20 +73,20 @@ would unblock, in the owner's hands only:
 - Strict-offline suite: full golden path runs with every non-loopback socket
   connection forcibly failing.
 
-## Honest limits
+## Honest limits (and delivery state)
 
 - macOS/Linux host execution: UNTESTED_PLATFORM.
 - Real cloud provider: UNTESTED_CLOUD_REAL (mock endpoint only).
 - Author familiarity effect: UNVALIDATED until the owner runs the blind test
   (`docs/user-acceptance-guide.zh.md`).
-- Independent QA: absent. G1–G5 cannot pass without it.
+- Independent QA: unavailable (MUSE_UNAVAILABLE). Technical candidate delivered.
 
-## Next actions
+## Next steps (Option B: technical candidate)
 
-1. Owner decision on A or B above.
-2. If A: I re-dispatch the final handoffs and process Muse verdicts; fixes then
-   go through the normal FAIL → new commit → re-test loop.
-3. If B: mark `MUSE_UNAVAILABLE` in `qa/muse-transport.json` (already recorded),
-   and the owner runs the blind evaluation for USER-01.
-4. Only after G1–G5 and the owner's confirmation: owner creates the empty
-   private GitHub repository; push follows the separate authorization.
+1. Owner runs the blind evaluation per `docs/user-acceptance-guide.zh.md` and
+   signs `qa/user-acceptance.json` (USER-01).
+2. Owner manually creates empty PRIVATE GitHub repository; provides URL.
+3. Owner gives explicit push authorization; implementer pushes to that repo.
+4. Later, if desired: owner authorizes public visibility, GitHub Release,
+   and addition to `AIMetaPhD/AIMetaPhD` list.
+

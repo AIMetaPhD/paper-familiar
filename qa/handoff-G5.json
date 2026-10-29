@@ -125,5 +125,6 @@
     "qa/evidence/G5/host-local/user-01-86539498fa1c.note.log",
     "qa/evidence/offline-proof.log"
   ],
-  "network_isolation_proof": "qa/evidence/offline-proof.log"
+  "network_isolation_proof": "qa/evidence/offline-proof.log",
+  "notes": "Muse QA unavailable (MUSE_UNAVAILABLE). G1-G4 handoffs and evidence are complete; G5 records the owner's own acceptance as the only remaining gate."
 }
