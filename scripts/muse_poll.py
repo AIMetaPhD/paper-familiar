@@ -45,6 +45,37 @@ def queue_get(path: str, timeout: int = 200) -> dict | None:
         return None
 
 
+def queue_results() -> dict[str, dict]:
+    """One /tasks listing (slow on a single-threaded queue) -> id -> result."""
+    listing = queue_get("/tasks", timeout=360)
+    out = {}
+    for row in (listing or {}).get("tasks", []):
+        task = row.get("task") or {}
+        if row.get("state") == "finished" and row.get("result") is not None:
+            out[task.get("id")] = {"result": row["result"],
+                                   "claimed_by": row.get("claimed_by")}
+    return out
+
+
+def ingest_if_present(gate: str, task_id: str, claimed_by: str,
+                      result: dict) -> tuple[str, str]:
+    """Persist verdict-in-result via muse_ingest; never invent one."""
+    evidence = (result or {}).get("evidence") or {}
+    if not isinstance(evidence.get("verdict"), dict):
+        return "missing", "no verdict object in the queue result"
+    tmp = ROOT / "qa" / "evidence" / f"muse-result-{gate}-{task_id[:8]}.json"
+    tmp.parent.mkdir(parents=True, exist_ok=True)
+    tmp.write_text(json.dumps(result, ensure_ascii=False), encoding="utf-8")
+    proc = subprocess.run([sys.executable, "scripts/muse_ingest.py", "--gate", gate,
+                           "--task-id", task_id, "--result-file", str(tmp),
+                           "--claimed-by", claimed_by or ""],
+                          cwd=ROOT, capture_output=True, text=True,
+                          env={**os.environ, "PYTHONUTF8": "1"})
+    if proc.returncode == 0:
+        return "persisted", proc.stdout.strip().splitlines()[0]
+    return "invalid", (proc.stderr or proc.stdout).strip()[:300]
+
+
 def validate_verdict(gate: str) -> tuple[str, str]:
     vp = ROOT / "qa" / f"muse-verdict-{gate}.json"
     rp = ROOT / "qa" / f"muse-report-{gate}.md"
@@ -118,6 +149,19 @@ def main() -> int:
             if state != "finished":
                 line(f"{info['gate']}/{info['recipient']} task {tid[:8]}: {state}")
                 continue
+            results = queue_results()
+            fetched = results.get(tid)
+            if fetched is not None:
+                ingested = ingest_if_present(info["gate"], tid,
+                                             fetched.get("claimed_by") or "", fetched["result"])
+                if ingested[0] == "persisted":
+                    line(f"{info['gate']}/{info['recipient']}: verdict persisted "
+                         f"from queue result ({ingested[1]})")
+                elif ingested[0] == "invalid":
+                    line(f"{info['gate']}/{info['recipient']}: verdict rejected: "
+                         f"{ingested[1]}")
+                else:
+                    line(f"{info['gate']}/{info['recipient']}: {ingested[1]}")
             verdict = validate_verdict(info["gate"])
             info["done"] = True
             info["note"] = f"task finished ({status.get('result_status')}); " \
