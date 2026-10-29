@@ -129,5 +129,12 @@
     "muse-1": "accepted the corrected contract already (G1 in flight); receives G2 re-dispatch.",
     "muse-3": "round-1 decline cited (a) read_only vs required-writes contradiction [fixed cdc3910] and (b) its own owner-relay permission rule. One retry with corrected dispatch; if it declines again its gates move to muse-1's queue and this file records it.",
     "final_run_note": "check_gates.py requires one final SHA for all five handoffs; these round-2 handoffs pin per-gate SHAs. Before asking for push authorization, all selftests are re-run and all five handoffs rebuilt on the same final commit."
+  },
+  "round2_outcome": {
+    "collected_at": "2026-10-29T02:25:00Z",
+    "fact": "muse-1 claimed G1 (task 75f89f26) and G2 (task e22197c4) at 19:14 local, then neither delivered within the queue's 30-minute claim window; muse-1's own consumer posted result status=failure with reason=stale_claim_recovered (\"领取后30分钟内未交付结果，队列自动回收\"). muse-3 never claimed G3/G4 (pending 8h).",
+    "cause_analysis": "(a) queue policy AUTO-CONSUMER-POLICY.md: \"approval_required 只有 Muse 认可的具体人类授权存在才能执行\" — my round-2 change to approval_required removed the autonomy the read_only canary had. (b) a full gate run (venv + playwright 3 engines + checks) risks exceeding the 30-minute claim window.",
+    "no_fabrication": "No verdict exists. Gates remain open. muse-2 evidence and muse-3 relay texts are recorded verbatim in this file and qa/muse-poll.log.",
+    "round3_contract": "read_only; Muse returns the full verdict JSON inside its authenticated queue result (byte-exact, sha256 included); Claude persists those bytes with a provenance record and never authors or edits them. Verdict may declare BLOCKED/UNTESTED per check if its environment cannot run something."
   }
 }
