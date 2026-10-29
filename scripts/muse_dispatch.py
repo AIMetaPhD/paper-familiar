@@ -72,18 +72,25 @@ What to do:
    that is not PASS).
 6. Write a human report at qa/muse-report-{gate}.md (commands, environments,
    findings, reproduction of any failure).
-7. Do NOT run git commit or git push; the implementer integrates and commits
-   evidence after reviewing it. Return your queue result with
-   status=success/failure and evidence {{"gate": "{gate}", "summary": "..."}}.
-   Additionally, paste the FULL verdict JSON (the same content you wrote to
-   qa/muse-verdict-{gate}.json, minified) into a second queue task reply only
-   if you could not write files; then set evidence.verdict_in_result=true and
-   include its sha256 so the implementer can persist and verify it byte-exact.
+7. This task is read_only: do not write anything into the repository and do
+   not commit or push. Return the verdict inside your authenticated queue
+   result instead: evidence = {{"gate": "{gate}", "verdict": <the full verdict
+   JSON object>, "verdict_sha256": "<sha256 of json.dumps(verdict,
+   sort_keys=True, separators=(',',':')) as UTF-8>", "summary": "..."}}.
+   The implementer persists those exact bytes with a provenance record; it
+   never edits them. If you cannot compute that canonical hash, include the
+   verdict object and set verdict_sha256 to null with a note.
+
+Timing: the queue watchdogs recover a claim that produces no result within 30
+minutes. Claim this task only when you can start immediately. Budget 25
+minutes: install/verify quickly, run the checks in handoff order, and if you
+are running out of time post the result you have with the unfinished checks
+explicitly UNTESTED or BLOCKED in the verdict — a partial, honest verdict is
+acceptable; a silent claim expiry is not.
 
 Hard rules:
-- You may write ONLY qa/muse-verdict-{gate}.json and qa/muse-report-{gate}.md
-  plus new files under qa/evidence/{gate}/muse/. Do not modify product source
-  code, fixtures, demo, or the handoff file.
+- Read-only in the repository: no writes, no commits, no pushes. Keep your
+  venv, Playwright downloads and temp files outside the repository.
 - Never run a TeX engine on any file; the product must not either.
 - Missing platform, engine, or permission => BLOCKED with reason, not guessed.
 - Your verdict must come from what YOU executed. Never copy wording or numbers
@@ -135,7 +142,7 @@ def main() -> int:
                 "verdict_schema": "schemas/qa-verdict.schema.json",
                 "run_id": handoff["run_id"],
             },
-            "permissions": "approval_required",
+            "permissions": "read_only",
         }
         encoded = json.dumps(body, ensure_ascii=False).encode("utf-8")
         result = queue_call("POST", "/tasks", encoded)
