@@ -6,16 +6,12 @@ gets fixed in one batch after the verdicts return, then re-verified, and the
 gates are re-run and handoffs rebuilt on the final consolidated SHA. If Muse
 reports them, they merge into this list.
 
-1. **Demo workspace accumulation** — every `POST /api/demo` creates a fresh
-   draft + 4 reference workspaces instead of reusing the bundle. Ten rows
-   already sit in the Data list on this machine. Fix: key the demo bundle by
-   its content revision id; return the existing workspace when it matches.
-   Affects: nothing in the matrix directly, but wastes disk and confuses the
-   user. Repro: click "Reload demo" three times, open Data, count rows.
-2. **"sources 0 B" without context** — the usage line counts only stored upload
-   copies (path/demo workspaces keep files in place, which is the design), but
-   reads like "no data". Fix label: "stored copies X · exports Y · cache Z
-   (path-imported folders are not duplicated)".
+1. **Demo workspace accumulation** — FIXED (9dc84f9): `demo_workspace` now
+   reuses the existing bundle keyed by content revision; tests cover reload
+   identity and decision persistence.
+2. **"sources 0 B" without context** — FIXED (9dc84f9): usage now reports
+   "stored copies · exports · cache · N path-imported folder(s) stay where
+   they are".
 3. **Reference modal opened from landing upload** shows, but there is no
    in-workbench affordance to *re-open* the section-labeling dialog for a
    reference once you left it; the checkbox list is there but the "label

@@ -149,7 +149,8 @@ def test_accept_dismiss_and_navigator(browser, server):
     page = _open_demo(browser, base)
     try:
         first = page.locator(".ledger-card").first
-        first.get_by_role("button", name="Accept").click()
+        if "Accepted" not in first.inner_text():
+            first.get_by_role("button", name="Accept").click()
         first.locator(".decision", has_text="Accepted").wait_for(timeout=15000)
         assert "Accepted" in first.inner_text()
 
@@ -176,11 +177,15 @@ def test_refresh_restores_workspace(browser, server):
     try:
         ws = page.evaluate("localStorage.getItem('paperfamiliar.workspace')")
         assert ws
-        page.locator(".ledger-card").first.get_by_role("button", name="Accept").click()
-        page.wait_for_timeout(600)
+        # the demo workspace is shared across tests, and Accept toggles: converge
+        first = page.locator(".ledger-card").first
+        if "Accepted" not in first.inner_text():
+            first.get_by_role("button", name="Accept").click()
+        first.locator(".decision", has_text="Accepted").wait_for(timeout=15000)
         page.reload(wait_until="domcontentloaded")
         page.wait_for_selector(".ledger-card", timeout=30000)
-        assert "Accepted" in page.locator(".ledger-card").first.inner_text()
+        restored = page.locator(".ledger-card").first
+        restored.locator(".decision", has_text="Accepted").wait_for(timeout=15000)
         assert page.evaluate("localStorage.getItem('paperfamiliar.workspace')") == ws
     finally:
         page.close()
