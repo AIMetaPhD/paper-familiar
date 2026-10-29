@@ -280,6 +280,12 @@ def test_screenshot_baseline(browser, server, tmp_path):
     engine, instance = browser
     page = _open_demo(browser, base)
     try:
+        # converge shared state: earlier tests may have accepted the first
+        # finding on the shared demo workspace; screenshot the baseline state
+        first = page.locator(".ledger-card").first
+        if "Accepted" in first.inner_text():
+            first.get_by_role("button", name="Accept").click()
+            first.locator(".decision", has_text="Unreviewed").wait_for(timeout=15000)
         # settle: no toasts, no pending transitions, caret not blinking mid-frame
         page.wait_for_selector(".busy-toast", state="detached", timeout=15000)
         page.evaluate("() => document.activeElement && document.activeElement.blur()")
