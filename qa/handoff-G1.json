@@ -1,9 +1,9 @@
 {
   "schema_version": "1.2",
   "gate": "G1",
-  "commit_sha": "494eaefbde3f6a5e950515bac10e3aff5903ce21",
-  "run_id": "996af2fc7925",
-  "created_at": "2026-10-28T17:24:40.442677+00:00",
+  "commit_sha": "6b07e4b546671f0d4bd790a6c85d3857e8d3b12b",
+  "run_id": "27bf4919a886",
+  "created_at": "2026-10-29T03:23:18.304354+00:00",
   "status": "SUBMITTED",
   "environment_fingerprint": "Windows-11-AMD64-py3.13.9",
   "tested_platforms": [
@@ -19,55 +19,55 @@
       "command": "E:\\ClaudeCodeFiles\\MyProducts\\PaperFamiliar\\paper-familiar\\.venv\\Scripts\\python.exe -m pytest -q tests/test_strict_offline.py tests/test_api.py::test_demo_persists_survives_restart_and_export_is_immutable",
       "exit_code": 0,
       "platform": "windows11_x64",
-      "log_path": "qa/evidence/G1/host-local/off-01-996af2fc7925.log"
+      "log_path": "qa/evidence/G1/host-local/off-01-27bf4919a886.log"
     },
     {
       "command": "scripts/g1_check.py (shared probe for WEB-SERVE)",
       "exit_code": 0,
       "platform": "windows11_x64",
-      "log_path": "qa/evidence/G1/host-local/g1_check-996af2fc7925.log"
+      "log_path": "qa/evidence/G1/host-local/g1_check-27bf4919a886.log"
     },
     {
       "command": "E:\\ClaudeCodeFiles\\MyProducts\\PaperFamiliar\\paper-familiar\\.venv\\Scripts\\python.exe -c import zipfile,sys;w=zipfile.ZipFile('dist/paperfamiliar-0.1.0-py3-none-any.whl');names=w.namelist();sys.exit(0 if any('web/dist/index.html' in n for n in names) and any('/demo/' in n for n in names) else 1)",
       "exit_code": 0,
       "platform": "windows11_x64",
-      "log_path": "qa/evidence/G1/host-local/web-pack-996af2fc7925.log"
+      "log_path": "qa/evidence/G1/host-local/web-pack-27bf4919a886.log"
     },
     {
       "command": "E:\\ClaudeCodeFiles\\MyProducts\\PaperFamiliar\\paper-familiar\\.venv\\Scripts\\python.exe -m pytest -q tests/e2e/test_browser.py",
       "exit_code": 0,
       "platform": "windows11_x64",
-      "log_path": "qa/evidence/G1/host-local/web-ui-smoke-996af2fc7925.log"
+      "log_path": "qa/evidence/G1/host-local/web-ui-smoke-27bf4919a886.log"
     },
     {
       "command": "scripts/g1_check.py (shared probe for WEB-NOPLATFORM)",
       "exit_code": 0,
       "platform": "windows11_x64",
-      "log_path": "qa/evidence/G1/host-local/g1_check-996af2fc7925.log"
+      "log_path": "qa/evidence/G1/host-local/g1_check-27bf4919a886.log"
     },
     {
       "command": "scripts/g1_check.py (shared probe for WEB-STATE-BOOT)",
       "exit_code": 0,
       "platform": "windows11_x64",
-      "log_path": "qa/evidence/G1/host-local/g1_check-996af2fc7925.log"
+      "log_path": "qa/evidence/G1/host-local/g1_check-27bf4919a886.log"
     },
     {
       "command": "E:\\ClaudeCodeFiles\\MyProducts\\PaperFamiliar\\paper-familiar\\.venv\\Scripts\\python.exe -m pytest -q tests/e2e/test_browser.py::test_demo_loads_and_clicking_a_finding_jumps_to_source",
       "exit_code": 0,
       "platform": "windows11_x64",
-      "log_path": "qa/evidence/G1/host-local/ux-01-996af2fc7925.log"
+      "log_path": "qa/evidence/G1/host-local/ux-01-27bf4919a886.log"
     },
     {
       "command": "E:\\ClaudeCodeFiles\\MyProducts\\PaperFamiliar\\paper-familiar\\.venv\\Scripts\\python.exe -m pytest -q tests/test_scanner.py tests/test_api.py::test_upload_from_browser_multiples",
       "exit_code": 0,
       "platform": "windows11_x64",
-      "log_path": "qa/evidence/G1/host-local/os-path-01-996af2fc7925.log"
+      "log_path": "qa/evidence/G1/host-local/os-path-01-27bf4919a886.log"
     },
     {
       "command": "scripts/g1_check.py (shared probe for WEB-PORT)",
       "exit_code": 0,
       "platform": "windows11_x64",
-      "log_path": "qa/evidence/G1/host-local/g1_check-996af2fc7925.log"
+      "log_path": "qa/evidence/G1/host-local/g1_check-27bf4919a886.log"
     }
   ],
   "checks": [
@@ -81,14 +81,14 @@
       ],
       "browsers_tested": [],
       "evidence_paths": [
-        "qa/evidence/G1/host-local/off-01-996af2fc7925.log"
+        "qa/evidence/G1/host-local/off-01-27bf4919a886.log"
       ]
     },
     {
       "id": "WEB-SERVE",
       "status": "PASS",
       "expected": "One local Python FastAPI server on 127.0.0.1:8420; no SaaS login",
-      "observed": "HTTP 200 {'status': 'ok', 'version': '0.1.0', 'mode': 'offline', 'bound': '127.0.0.1:62030', 'csrf': True}",
+      "observed": "HTTP 200 {'status': 'ok', 'version': '0.1.0', 'mode': 'offline', 'bound': '127.0.0.1:56482', 'csrf': True}",
       "platforms_tested": [
         "windows11_x64"
       ],
@@ -96,7 +96,7 @@
         "chromium"
       ],
       "evidence_paths": [
-        "qa/evidence/G1/host-local/g1_check-996af2fc7925.log"
+        "qa/evidence/G1/host-local/g1_check-27bf4919a886.log"
       ]
     },
     {
@@ -109,7 +109,7 @@
       ],
       "browsers_tested": [],
       "evidence_paths": [
-        "qa/evidence/G1/host-local/web-pack-996af2fc7925.log"
+        "qa/evidence/G1/host-local/web-pack-27bf4919a886.log"
       ]
     },
     {
@@ -126,7 +126,7 @@
         "webkit"
       ],
       "evidence_paths": [
-        "qa/evidence/G1/host-local/web-ui-smoke-996af2fc7925.log"
+        "qa/evidence/G1/host-local/web-ui-smoke-27bf4919a886.log"
       ]
     },
     {
@@ -141,7 +141,7 @@
         "chromium"
       ],
       "evidence_paths": [
-        "qa/evidence/G1/host-local/g1_check-996af2fc7925.log"
+        "qa/evidence/G1/host-local/g1_check-27bf4919a886.log"
       ]
     },
     {
@@ -156,7 +156,7 @@
         "chromium"
       ],
       "evidence_paths": [
-        "qa/evidence/G1/host-local/g1_check-996af2fc7925.log"
+        "qa/evidence/G1/host-local/g1_check-27bf4919a886.log"
       ]
     },
     {
@@ -173,7 +173,7 @@
         "webkit"
       ],
       "evidence_paths": [
-        "qa/evidence/G1/host-local/ux-01-996af2fc7925.log"
+        "qa/evidence/G1/host-local/ux-01-27bf4919a886.log"
       ]
     },
     {
@@ -186,7 +186,7 @@
       ],
       "browsers_tested": [],
       "evidence_paths": [
-        "qa/evidence/G1/host-local/os-path-01-996af2fc7925.log"
+        "qa/evidence/G1/host-local/os-path-01-27bf4919a886.log"
       ]
     },
     {
@@ -201,19 +201,19 @@
         "chromium"
       ],
       "evidence_paths": [
-        "qa/evidence/G1/host-local/g1_check-996af2fc7925.log"
+        "qa/evidence/G1/host-local/g1_check-27bf4919a886.log"
       ]
     }
   ],
   "failed_gates": [],
   "evidence_paths": [
-    "qa/evidence/G1/host-local/g1_check-996af2fc7925.log",
-    "qa/evidence/G1/host-local/handoff-context-996af2fc7925.log",
-    "qa/evidence/G1/host-local/off-01-996af2fc7925.log",
-    "qa/evidence/G1/host-local/os-path-01-996af2fc7925.log",
-    "qa/evidence/G1/host-local/ux-01-996af2fc7925.log",
-    "qa/evidence/G1/host-local/web-pack-996af2fc7925.log",
-    "qa/evidence/G1/host-local/web-ui-smoke-996af2fc7925.log",
+    "qa/evidence/G1/host-local/g1_check-27bf4919a886.log",
+    "qa/evidence/G1/host-local/handoff-context-27bf4919a886.log",
+    "qa/evidence/G1/host-local/off-01-27bf4919a886.log",
+    "qa/evidence/G1/host-local/os-path-01-27bf4919a886.log",
+    "qa/evidence/G1/host-local/ux-01-27bf4919a886.log",
+    "qa/evidence/G1/host-local/web-pack-27bf4919a886.log",
+    "qa/evidence/G1/host-local/web-ui-smoke-27bf4919a886.log",
     "qa/evidence/offline-proof.log"
   ],
   "network_isolation_proof": "qa/evidence/offline-proof.log"

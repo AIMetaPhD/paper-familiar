@@ -1,9 +1,11 @@
 # G1–G5 acceptance summary — PaperFamiliar v1.2
 
 - Date: 2026-10-29
-- Code SHA for all evidence below: rebuilt on the final frozen commit by
-  `scripts/final_gate_run.py`; this document is regenerated from
-  `qa/final-gate-run.json` after each run.
+- Code SHA for all five handoffs: **`6b07e4b`** (product tree src/web/fixtures/
+  demo frozen there; only qa/docs commits follow, verified by make_handoff's
+  tree-diff check). Selftests G1 9/9, G2 12/12, G3 8/8, G4 12/12, G5 3/6 all
+  bind this SHA; handoff files pin it. Regenerate with
+  `scripts/final_gate_run.py` after any code change.
 - **Status: NOT ACCEPTED.** Implementer self-tests pass on this host; the
   independent Muse verdicts and the product owner's own signature are missing.
   No gate is claimed as passed.
@@ -16,7 +18,7 @@
 | G2 | deterministic evidence, quote gate, security, web guards | see `qa/evidence/G2/host-local/selftest.json` | **none — blocked** | n/a |
 | G3 | style/cognitive profiles, abstention, navigator, drift cards | see `qa/evidence/G3/host-local/selftest.json` | **none — blocked** | n/a |
 | G4 | tri-engine E2E, persistence/delete, AI privacy, exports, layout | see `qa/evidence/G4/host-local/selftest.json` | **none — blocked** | n/a |
-| G5 | Muse independence, final regression, release readiness | 3/6 (QA-01/02 BLOCKED, USER-01 UNTESTED) | **none — blocked** | **not signed** |
+| G5 | Muse independence, final regression, release readiness | 3/6 on this SHA (QA-01/02 BLOCKED by design, USER-01 UNTESTED) | **none — blocked** | **not signed** |
 
 `python scripts/check_gates.py --root .` exits **2** — correct, because no
 `qa/muse-verdict-*.json` exists. That file may only be produced by Muse.

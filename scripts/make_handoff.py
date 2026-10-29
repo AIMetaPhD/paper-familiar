@@ -133,7 +133,7 @@ def main() -> int:
     out = ROOT / "qa" / f"handoff-{args.gate}.json"
     out.write_text(json.dumps(doc, indent=2, ensure_ascii=False), encoding="utf-8")
     print(f"wrote {out.relative_to(ROOT)}: {len(checks)} checks, "
-          f"{len(open_ids)} non-PASS, commit {sha[:12]}")
+          f"{len(open_ids)} non-PASS, commit {code_sha[:12]} (HEAD {sha[:12]})")
     return 0
 
 
