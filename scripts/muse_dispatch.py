@@ -78,13 +78,13 @@ def main() -> int:
         body = {
             "recipient": recipient,
             "kind": f"paperfamiliar_gate_{args.gate.lower()}",
-            "instructions": INSTRUCTIONS.format(gate=args.gate, repo=str(ROOT), sha=sha),
+            "instructions": INSTRUCTIONS.format(gate=args.gate, repo=str(ROOT)),
             "inputs": {
                 "gate": args.gate,
                 "commit_sha": sha,
-                "handoff_file": f"qa/handoff-{args.gate}.json",
-                "verdict_schema": "schemas/qa-verdict.schema.json",
                 "run_id": handoff["run_id"],
+                "handoff_file": f"qa/handoff-{args.gate}.json",
+                "procedure_file": "qa/MUSE_PROCEDURE.md",
             },
             "permissions": "read_only",
         }
