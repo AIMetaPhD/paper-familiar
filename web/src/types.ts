@@ -210,3 +210,22 @@ export interface ProviderResult {
   candidate_only?: boolean;
   notice?: string;
 }
+
+export interface SourceIntegrityFile {
+  path: string;
+  state: "unchanged" | "changed" | "missing" | "unavailable";
+  expected_sha256: string;
+  actual_sha256: string | null;
+}
+
+export interface SourceIntegrity {
+  status: "unchanged" | "changed" | "unavailable";
+  checked_at: string;
+  files: SourceIntegrityFile[];
+}
+
+export interface ExportInfo {
+  directory: string;
+  files: string[];
+  source_integrity: SourceIntegrity;
+}

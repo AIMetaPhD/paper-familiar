@@ -22,6 +22,22 @@ DECISION_LABEL = {
 }
 
 
+def _integrity_warning(integrity: dict[str, Any] | None) -> str | None:
+    if not integrity or integrity.get("status") == "unchanged":
+        return None
+    if integrity.get("status") == "unavailable":
+        return ("> **Source unavailable.** The original source folder is no longer readable; this "
+                "report describes the stored analysis snapshot.")
+    paths = sorted({row["path"] for row in integrity.get("files", [])
+                    if row["state"] != "unchanged"})
+    listed = ", ".join(f"`{p}`" for p in paths[:5])
+    if len(paths) > 5:
+        listed += f" (+{len(paths) - 5} more)"
+    return ("> **Source changed after analysis.** " + listed +
+            " no longer match the analyzed snapshot, so line/column coordinates and quotes may be "
+            "stale. Re-run the audit before acting on this report.")
+
+
 def build_markdown_report(summary: dict[str, Any]) -> str:
     findings = summary["findings"]
     counts: dict[str, int] = {}
@@ -45,6 +61,9 @@ def build_markdown_report(summary: dict[str, Any]) -> str:
     ]
     for status, count in sorted(counts.items()):
         lines.append(f"  - {STATUS_LABEL.get(status, status)}: {count}")
+    warning = _integrity_warning(summary.get("source_integrity"))
+    if warning:
+        lines += ["", warning]
     if summary.get("assumptions"):
         lines += ["", "## Demo assumptions", ""]
         lines += [f"- {item}" for item in summary["assumptions"]]
@@ -131,18 +150,24 @@ def build_agent_feedback(summary: dict[str, Any]) -> dict:
     approved = [f for f in summary["findings"] if f["human_decision"] == "accepted"]
     dismissed = [f for f in summary["findings"] if f["human_decision"] == "dismissed"]
     baseline = summary.get("style", {}).get("baseline", {})
+    integrity = summary.get("source_integrity")
+    constraints = [
+        "Edit only the text covered by an approved finding.",
+        "Do not change technical meaning, variable names, equations, or conclusions.",
+        "Return a unified diff first; write to disk only after explicit user approval.",
+        "Do not use metadata corroboration as evidence that a claim is supported.",
+        "Do not rewrite passages merely because they differ from the author's baseline.",
+        "Do not add citations that are not present in the supplied bibliography.",
+    ]
+    if integrity and integrity.get("status") != "unchanged":
+        constraints.append(
+            "The source changed after analysis; re-run the audit before applying these findings.")
     return {
         "schema": "paperfamiliar.agent-feedback/v1",
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "document_revision_id": summary["revision_id"],
-        "constraints": [
-            "Edit only the text covered by an approved finding.",
-            "Do not change technical meaning, variable names, equations, or conclusions.",
-            "Return a unified diff first; write to disk only after explicit user approval.",
-            "Do not use metadata corroboration as evidence that a claim is supported.",
-            "Do not rewrite passages merely because they differ from the author's baseline.",
-            "Do not add citations that are not present in the supplied bibliography.",
-        ],
+        "constraints": constraints,
+        "source_integrity": integrity,
         "approved_findings": [
             {"id": f["id"], "rule_id": f["rule_id"], "status": f["evidence_status"],
              "claim": f["claim"], "source_span": f["source_span"]}

@@ -190,7 +190,9 @@ def create_app(store: Store | None = None) -> FastAPI:
 
     @app.post("/api/workspace/{workspace_id}/audit")
     def reaudit(workspace_id: str) -> dict:
-        """Re-run the deterministic audit; review state is preserved by finding id."""
+        """Re-run the audit. Review state is keyed by the content-addressed
+        finding id, so it survives line shifts and resets when the quoted text
+        changes."""
         run = run_for(workspace_id)
         try:
             loaded = load_workspace(Path(run.payload["source_path"]))

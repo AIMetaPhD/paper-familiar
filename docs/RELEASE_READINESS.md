@@ -4,7 +4,7 @@ All items must be ✅ before the owner authorizes push to GitHub.
 
 ## Product (code & tests) — ✅ FROZEN at SHA `6b07e4b`
 
-- [x] 58 unit/API/offline tests passing
+- [x] 60 unit/API/offline tests passing
 - [x] 36 Playwright E2E tests across Chromium, Firefox, WebKit (passing)
 - [x] `scripts/g1_check.py` 7/7 runtime probes passing on source + clean-venv wheel
 - [x] Real local model probe recorded (qwen3.5:9b, candidate status)
@@ -57,6 +57,27 @@ All three Muse agents blocked by their own platform policies; no workaround atte
 - [ ] GitHub Release creation
 - [ ] `AIMetaPhD/AIMetaPhD` README update
 
+## Post-freeze fixes (2026-11-09)
+
+Two defects found by the state-machine inventory (`docs/state-machines.md`) were
+fixed after the frozen candidate was delivered:
+
+1. **Finding IDs are content-addressed.** Review state no longer leaks from one
+   problem to a different problem of the same rule after a re-audit.
+2. **Export re-checks source hashes.** `source_integrity` is declared in
+   `report.json`, `report.md`, `agent-feedback.json` and the export modal.
+
+Verification on the new HEAD: 60 unit/API tests and 36 Playwright E2E tests
+(Chromium, Firefox, WebKit) pass. The gate handoffs, evidence and
+`qa/templates/user-acceptance.template.json` remain pinned to `6b07e4b` as
+historical evidence; they were not regenerated. Owner evaluation should use the
+current HEAD.
+
 ## Ready-to-ship statement
 
-> **PaperFamiliar v1.2 is a complete, locally verified technical candidate.** All self-tests pass, the wheel installs and runs from a clean venv, Muse transport is proven, and the only open items are independent QA verdicts and the product owner's own acceptance signature. No product code changes remain; the tree is frozen at `6b07e4b`.
+> **PaperFamiliar v1.2 is a complete, locally verified technical candidate.**
+> All self-tests pass, the wheel installs and runs from a clean venv, Muse
+> transport is proven, and the only open items are independent QA verdicts and
+> the product owner's own acceptance signature. The product tree at `6b07e4b`
+> is frozen for the gate record; HEAD carries two post-freeze fixes verified by
+> the same suites.

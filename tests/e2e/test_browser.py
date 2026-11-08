@@ -199,7 +199,7 @@ def test_export_reports_unchanged_source(browser, server):
         page.wait_for_selector(".modal.wide", timeout=20000)
         text = page.locator(".modal.wide").inner_text()
         assert "report.json" in text and "agent-feedback.json" in text
-        assert "Source hash unchanged after export." in text
+        assert "All source hashes match the analyzed revision." in text
     finally:
         page.close()
 
@@ -274,6 +274,44 @@ def test_layout_has_no_page_overflow(browser, server, width, height):
         page.close()
 
 
+def _screenshots_match(previous: bytes, shot: bytes) -> bool:
+    """Byte equality first; otherwise tolerate font antialiasing jitter.
+
+    A cold font cache can change subpixel rendering between runs while the
+    layout and text stay identical. Real UI changes show up as large channel
+    deltas, so bound both the changed-pixel fraction and the peak delta.
+    """
+    if previous == shot:
+        return True
+    try:
+        import io
+
+        from PIL import Image, ImageChops
+    except ImportError:  # pragma: no cover - dev extra is declared in pyproject
+        return False
+    try:
+        before = Image.open(io.BytesIO(previous)).convert("RGB")
+        after = Image.open(io.BytesIO(shot)).convert("RGB")
+    except Exception:  # noqa: BLE001 - an unreadable baseline is a mismatch
+        return False
+    if before.size != after.size:
+        return False
+    diff = ImageChops.difference(before, after)
+    pixels = (diff.get_flattened_data() if hasattr(diff, "get_flattened_data")
+              else diff.getdata())
+    changed = 0
+    peak = 0
+    total = 0
+    for pixel in pixels:
+        total += 1
+        if pixel != (0, 0, 0):
+            changed += 1
+            high = max(pixel)
+            if high > peak:
+                peak = high
+    return total > 0 and changed / total <= 0.05 and peak <= 32
+
+
 def test_screenshot_baseline(browser, server, tmp_path):
     """Capture a deterministic screenshot per engine for visual regression."""
     base, _port, _log = server
@@ -295,12 +333,14 @@ def test_screenshot_baseline(browser, server, tmp_path):
         out_dir.mkdir(parents=True, exist_ok=True)
         path = out_dir / "demo-workbench.png"
         previous = path.read_bytes() if path.is_file() else None
-        path.write_bytes(shot)
-        if previous is not None and previous != shot:
-            # pixel drift is a review signal, not an automatic failure: the
-            # differing copy stays next to the baseline for a human look.
+        if previous is None:
+            path.write_bytes(shot)
+        elif not _screenshots_match(previous, shot):
+            # pixel drift is a review signal, not an automatic failure: keep
+            # the baseline and leave the differing copy next to it for a human.
             (out_dir / "demo-workbench.diff.png").write_bytes(shot)
             pytest.xfail(f"visual drift on {engine}; compare demo-workbench.diff.png")
+        # within tolerance: leave the committed baseline untouched
     finally:
         page.close()
 

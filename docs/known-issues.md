@@ -31,3 +31,21 @@ reports them, they merge into this list.
 Fix-order after verdicts: 1 → 2 → 3 (verify) → commit → full pytest + g1 +
 e2e rerun → regenerate selftests/handoffs on the final SHA → G5 dispatch →
 then, and only then, the user-acceptance step.
+
+## Post-freeze fixes (2026-11-09)
+
+Found by the state-machine inventory (`docs/state-machines.md`), fixed after the
+technical candidate was delivered:
+
+6. **Review decisions inherited by different findings** — FIXED: finding IDs are
+   now content-addressed (`rule + file + exact quote`), so a line shift keeps the
+   decision and a changed quote resets it to `unreviewed`. Regression test
+   `test_finding_ids_are_content_addressed_across_reaudits`.
+7. **Export did not re-check source hashes** — FIXED: `source_integrity` is
+   computed at export time and declared in `report.json`, `report.md`,
+   `agent-feedback.json` and the export modal. Regression test
+   `test_export_declares_source_drift`.
+
+Both are product changes after the 6b07e4b freeze. Gate handoffs and
+`qa/user-acceptance.json` remain pinned to `6b07e4b` as historical evidence;
+the owner should evaluate the current HEAD.

@@ -23,14 +23,20 @@ author's own blind sign-off are still outstanding. Nothing is published anywhere
 | Item | State |
 |---|---|
 | Local server + browser UI, offline demo, upload, persistence, exports | working, self-tested |
-| Unit tests (parser, rules, quote gate, security, style, navigator, providers, offline proof) | 58 passing on this machine |
+| Unit tests (parser, rules, quote gate, security, style, navigator, providers, offline proof) | 60 passing on this machine |
 | Playwright E2E on Chromium / Firefox / WebKit | 36 passing on this machine (one host) |
 | Wheel packaging (`web/dist` + demo inside the wheel) | verified; clean-venv install check pending |
 | Independent Muse QA (G1–G5) | transport verified working; verdicts pending |
 | Author blind evaluation (G5, `USER-01`) | reserved for you |
 | macOS / Linux | `UNTESTED_PLATFORM` — same code path, no host has run it |
 | Real cloud API | `UNTESTED_CLOUD_REAL` — consent flow proven against a mock endpoint |
-| Private repository | pushed to `AIMetaPhD/paper-familiar` (PRIVATE) on 2026-10-29, commit `c391414` — public visibility, Release and the AIMetaPhD list remain unauthorized |
+| Private repository | pushed to `AIMetaPhD/paper-familiar` (PRIVATE) on 2026-10-29 — public visibility, Release and the AIMetaPhD list remain unauthorized |
+
+Post-freeze fixes (2026-11-09): finding IDs are content-addressed, so a review
+decision can no longer leak onto different text after a re-audit; exports now
+re-hash the source and declare drift. Gate handoffs and the owner-acceptance
+template remain pinned to `6b07e4b` as historical evidence — evaluate the
+current HEAD.
 
 ## Requirements
 

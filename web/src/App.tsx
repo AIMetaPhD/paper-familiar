@@ -4,6 +4,7 @@ import { api } from "./api";
 import ModelsPanel from "./ModelsPanel";
 import type {
   DriftCard,
+  ExportInfo,
   Finding,
   NavigateResult,
   RunSummary,
@@ -599,8 +600,7 @@ export default function App() {
   const [selectedText, setSelectedText] = useState("");
   const [manageReference, setManageReference] = useState<string | null>(null);
   const [referenceRows, setReferenceRows] = useState<WorkspaceRow[]>([]);
-  const [exportInfo, setExportInfo] = useState<{ directory: string; files: string[] } | null>(null);
-  const [sourceIntact, setSourceIntact] = useState<boolean | null>(null);
+  const [exportInfo, setExportInfo] = useState<ExportInfo | null>(null);
   const [recent, setRecent] = useState<WorkspaceRow[]>([]);
 
   const wsId = run?.workspace_id ?? "";
@@ -648,7 +648,6 @@ export default function App() {
     setNav(null);
     setActiveFinding(null);
     setExportInfo(null);
-    setSourceIntact(null);
     setTab("evidence");
     if (next.workspace_id) localStorage.setItem(LAST_WORKSPACE_KEY, next.workspace_id);
     await loadFile(next.workspace_id ?? "", next.main_path);
@@ -756,8 +755,6 @@ export default function App() {
     setBusy("Writing exports…");
     try {
       const info = await api.exportRun(wsId);
-      const check = await api.file(wsId, run.main_path);
-      setSourceIntact(check.unchanged);
       setExportInfo(info);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
@@ -1251,13 +1248,24 @@ export default function App() {
                 </li>
               ))}
             </ul>
-            <p className={sourceIntact === false ? "error" : "ok-line"}>
-              {sourceIntact === null
-                ? "Source verification pending."
-                : sourceIntact
-                  ? "Source hash unchanged after export."
-                  : "Source changed on disk — exports refer to an earlier revision."}
+            <p className={exportInfo.source_integrity.status !== "unchanged" ? "error" : "ok-line"}>
+              {exportInfo.source_integrity.status === "unchanged"
+                ? "All source hashes match the analyzed revision."
+                : exportInfo.source_integrity.status === "unavailable"
+                  ? "Source folder unavailable — exports describe the stored snapshot."
+                  : "Source changed on disk — exports carry a warning and may point to stale lines."}
             </p>
+            {exportInfo.source_integrity.status === "changed" && (
+              <ul className="privacy">
+                {exportInfo.source_integrity.files
+                  .filter((row) => row.state !== "unchanged")
+                  .map((row) => (
+                    <li key={row.path}>
+                      <span className="mono small">{row.path}</span> — {row.state}
+                    </li>
+                  ))}
+              </ul>
+            )}
             <p className="fine">
               By default exports contain findings, coordinates and aggregate style metrics, not
               the full manuscript.

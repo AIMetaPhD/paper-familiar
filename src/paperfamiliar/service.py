@@ -12,8 +12,10 @@ Layout of responsibilities:
 """
 from __future__ import annotations
 
+import hashlib
 import os
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -225,7 +227,6 @@ def file_text(store: Store, run: RunRecord, rel_path: str) -> dict:
     root = run.root.resolve()
     if full != root and not str(full).startswith(str(root) + os.sep):
         raise PermissionError("path escapes workspace")
-    import hashlib
 
     raw = full.read_bytes()
     digest = hashlib.sha256(raw).hexdigest()
@@ -243,8 +244,44 @@ def file_text(store: Store, run: RunRecord, rel_path: str) -> dict:
             "unchanged": expected is None or digest == expected}
 
 
+def source_integrity(run: RunRecord) -> dict:
+    """Compare the analyzed snapshot with the files on disk at export time.
+
+    The run payload is immutable evidence of what was analyzed; this check makes
+    a later source edit visible instead of silently exporting stale coordinates.
+    """
+    root = run.root.resolve()
+    rows: list[dict] = []
+    for expected in run.payload.get("files", []):
+        rel = expected["path"]
+        full = (root / rel).resolve()
+        if full != root and not str(full).startswith(str(root) + os.sep):
+            rows.append({"path": rel, "state": "unavailable", "expected_sha256": expected["sha256"],
+                         "actual_sha256": None})
+            continue
+        try:
+            digest = hashlib.sha256(full.read_bytes()).hexdigest()
+        except OSError:
+            rows.append({"path": rel, "state": "missing", "expected_sha256": expected["sha256"],
+                         "actual_sha256": None})
+            continue
+        rows.append({"path": rel, "state": "unchanged" if digest == expected["sha256"] else "changed",
+                     "expected_sha256": expected["sha256"], "actual_sha256": digest})
+    states = {row["state"] for row in rows}
+    if not rows:
+        status = "unavailable"
+    elif states == {"unchanged"}:
+        status = "unchanged"
+    else:
+        status = "changed"
+    return {"status": status, "checked_at": datetime.now(timezone.utc).isoformat(),
+            "files": rows}
+
+
 def export_run(store: Store, run: RunRecord) -> dict:
     data = summary(store, run)
+    integrity = source_integrity(run)
+    data["source_integrity"] = integrity
     out = store.exports_dir / run.id
     out.mkdir(parents=True, exist_ok=True)
     written = []
@@ -260,7 +297,7 @@ def export_run(store: Store, run: RunRecord) -> dict:
         path = out / name
         path.write_text(content, encoding="utf-8")
         written.append(name)
-    return {"directory": str(out), "files": written}
+    return {"directory": str(out), "files": written, "source_integrity": integrity}
 
 
 def run_navigator(store: Store, run: RunRecord, query: str) -> dict:

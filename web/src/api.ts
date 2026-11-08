@@ -1,4 +1,5 @@
 import type {
+  ExportInfo,
   NavigateResult,
   ProviderPreview,
   ProviderResult,
@@ -94,7 +95,7 @@ export const api = {
       body: JSON.stringify({ query }),
     }),
   exportRun: (id: string) =>
-    request<{ directory: string; files: string[] }>(`/api/workspace/${id}/export`, {
+    request<ExportInfo>(`/api/workspace/${id}/export`, {
       method: "POST",
       body: "{}",
     }),

@@ -31,12 +31,12 @@ inconsistency), **H** high (silent wrong result).
 | 4 | Workspace deletion | `storage.py:delete_workspace` | stored / path / missing | filesystem + SQLite | M |
 | 5 | Run lifecycle | `service.analyze`, `/audit` | created / re-audited / stale-source / deleted | SQLite `runs` | M |
 | 6 | Finding admission | `evidence.verify_span` | produced → admitted / rejected | run payload JSON | H |
-| 7 | Human decision ledger | `decisions` table, `App.decide` | unreviewed ↔ accepted ↔ dismissed ↔ needs_review | SQLite `decisions` | H |
+| 7 | Human decision ledger | `decisions` table, `App.decide` | unreviewed ↔ accepted ↔ dismissed ↔ needs_review | SQLite `decisions` | M (H fixed) |
 | 8 | Contribution labels | `labels` table, `refresh_style` | per-section + blanket `ALL` | SQLite `labels` | M |
 | 9 | Baseline / drift | `fingerprint.build_baseline` | insufficient_evidence / ok; card observed / insufficient | run payload | M |
 | 10 | Navigator lookup | `fingerprint.navigate` | found / not_found | none (response) | L |
 | 11 | File read integrity | `service.file_text` | unchanged / changed / gone / forbidden | computed per read | M |
-| 12 | Export generation | `service.export_run` | not generated / generated / missing | `exports/` files | M |
+| 12 | Export generation | `service.export_run` | not generated / generated / missing / source drifted | `exports/` files | L (M fixed) |
 | 13 | Consent transaction | `providers.ConsentStore` | preview → confirmed → used / expired / hash-mismatch | SQLite `consents` | M |
 | 14 | Provider probe | `providers.probe/status` | available / no_models / unavailable | none (response) | L |
 | 15 | Metadata lookup | `metadata.lookup_doi` | invalid / offline / not_found / network_error / corroborated | cache JSON, 30 d | L |
@@ -222,13 +222,23 @@ Two representations of the same state exist: **no row** and **a row whose value
 is `unreviewed`**. `summary()` treats both as `unreviewed`, so behavior is
 correct, but the table accumulates terminal rows that mean "never decided".
 
-Risk: **H** — finding IDs are **ordinal per rule**, not content-addressed
-(`rules._Ids`: `F-<rule>-0001`). Re-audit preserves decisions by ID, and the
-endpoint docstring says so. Consequence: if the user fixes finding `0001` of a
-rule and a *different* problem of the same rule becomes `0001`, the new finding
-silently inherits the old decision (e.g. `dismissed`, or `accepted`). The
-current tests do not exercise that sequence. This is the single most
-consequential implicit transition in the product.
+Fixed 2026-11-09 (was **H**). Finding IDs are now content-addressed:
+`F-<rule>-<sha256(rule, file_path, exact_quote)[:10]>`, with an occurrence
+suffix only when the same rule quotes identical text more than once in a file
+(`rules._Ids`). Consequences:
+
+- Moving a finding (inserting lines above it) keeps the ID, so a decision
+  survives edits that do not change the quoted text.
+- Changing the quoted text yields a new ID, so the new problem starts
+  `unreviewed`; it can never inherit the old decision.
+- Decisions whose findings disappeared stay as orphan rows and are ignored by
+  `summary()`. If the identical quote returns later, its decision returns too —
+  arguably correct for "the same issue resurfaced".
+
+Residual risk: **M** — an edit inside the quote forces re-review even when the
+user considers it the same problem. That is the conservative direction.
+Regression test: `test_finding_ids_are_content_addressed_across_reaudits`
+(accept → line shift keeps the decision → quote change resets it).
 
 ## 8. Contribution labels and baseline admission
 
@@ -319,12 +329,19 @@ States: `not generated` (files absent) → `generated` (five files written) →
   the file does not exist.
 - Exports are removed with the workspace.
 
-Risk: **M** — `export_run()` does **not** re-hash source files. It writes the
-snapshot from the last run. If files changed on disk after analysis, the
-exported report is labeled with the old revision and no drift warning. The
-README's claim that the hash is "re-checked and reported unchanged" refers to
-the `/file` endpoint, not to export. This gap should be closed or documented as
-a known limitation.
+Fixed 2026-11-09 (was **M**). `export_run()` now calls `source_integrity(run)`,
+which re-hashes every file in the analyzed snapshot and classifies it as
+`unchanged`, `changed`, `missing` or `unavailable`. The result is written into:
+
+- `report.json` (`source_integrity` with per-file expected/actual hashes);
+- `report.md` (a blockquote warning naming the drifted files);
+- `agent-feedback.json` (`source_integrity` plus an extra constraint telling the
+  writing agent to re-run the audit first);
+- the API response and the export modal, which lists every drifted file.
+
+Export is still allowed when the source drifted — a historical snapshot is
+legitimate — but it can no longer be silent. Regression test:
+`test_export_declares_source_drift`.
 
 ## 13. Consent transaction
 
@@ -651,13 +668,14 @@ transaction; a crash mid-delete leaves an unknown mixture.
    `unavailable_offline`, `MUSE_UNAVAILABLE` and quote-gate `rejected` are all
    explicit refusing states rather than missing values. This is the product's
    core invariant and should be preserved in any refactor.
-4. **Highest-risk transition:** re-audit with ordinal finding IDs (#7). If
-   review state is meant to survive edits, IDs must become content-addressed
-   (rule + file + quote/excerpt hash) or decisions must be invalidated when the
-   finding's span or quote changes. Until then, "review state is preserved by
-   finding id" is true mechanically but not semantically.
-5. **Second gap:** export (#12) does not re-verify source hashes, so an export
-   can silently describe a stale snapshot.
+4. **Former highest-risk transition, fixed (#7).** Review state used to leak
+   across re-audits because finding IDs were ordinal. IDs are now
+   content-addressed (rule + file + exact quote), so a decision survives a line
+   shift and is dropped when the quoted text changes. The residual cost is a
+   forced re-review when an edit touches the quote itself.
+5. **Former silent gap, fixed (#12).** Export now re-hashes the snapshot and
+   declares drift in `report.json`, `report.md`, `agent-feedback.json` and the
+   UI, instead of exporting stale coordinates without warning.
 6. **Minor asymmetries worth a follow-up:** `unreviewed` stored as a row; a
    successful label write can leave the baseline stale if the follow-up style
    refresh fails (#22); metadata negative results not cached (deliberate);

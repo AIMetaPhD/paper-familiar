@@ -226,3 +226,77 @@ def test_usage_reports_stored_and_path_workspaces_separately(tmp_path):
     usage = client.get("/api/settings").json()["usage"]
     assert usage["stored_workspaces"] == 0  # demo is path-based, nothing copied
     assert usage["path_workspaces"] >= 5
+
+
+def _tiny_paper(root: Path, cite: str = "missingone") -> Path:
+    root.mkdir(parents=True, exist_ok=True)
+    (root / "main.tex").write_text(
+        "\\documentclass{article}\n"
+        "\\begin{document}\n"
+        f"See \\cite{{{cite}}} for details.\n"
+        "\\end{document}\n",
+        encoding="utf-8",
+    )
+    return root
+
+
+def test_finding_ids_are_content_addressed_across_reaudits(tmp_path):
+    """A decision survives a line shift but is never inherited by different text."""
+    app, client = make_client(tmp_path)
+    paper = _tiny_paper(tmp_path / "paper")
+    run = client.post("/api/workspace/path",
+                      json={"path": str(paper), "kind": "manuscript"},
+                      headers=headers(app)).json()
+    ws_id = run["workspace_id"]
+    cite = next(f for f in run["findings"] if f["rule_id"] == "cite.undefined_key")
+    client.post(f"/api/workspace/{ws_id}/decision",
+                json={"finding_id": cite["id"], "decision": "accepted"},
+                headers=headers(app))
+
+    # Editing above the finding must not change its identity.
+    main = paper / "main.tex"
+    main.write_text("% a new comment line\n" + main.read_text(encoding="utf-8"),
+                    encoding="utf-8")
+    shifted = client.post(f"/api/workspace/{ws_id}/audit", json={},
+                          headers=headers(app)).json()
+    same = next(f for f in shifted["findings"] if f["rule_id"] == "cite.undefined_key")
+    assert same["id"] == cite["id"]
+    assert same["human_decision"] == "accepted"
+
+    # Replacing the quoted text is a different problem and must be unreviewed.
+    main.write_text(main.read_text(encoding="utf-8").replace(
+        "\\cite{missingone}", "\\cite{missingtwo}"), encoding="utf-8")
+    changed = client.post(f"/api/workspace/{ws_id}/audit", json={},
+                          headers=headers(app)).json()
+    other = next(f for f in changed["findings"] if f["rule_id"] == "cite.undefined_key")
+    assert other["id"] != cite["id"]
+    assert other["human_decision"] == "unreviewed"
+
+
+def test_export_declares_source_drift(tmp_path):
+    app, client = make_client(tmp_path)
+    paper = _tiny_paper(tmp_path / "paper")
+    run = client.post("/api/workspace/path",
+                      json={"path": str(paper), "kind": "manuscript"},
+                      headers=headers(app)).json()
+    ws_id = run["workspace_id"]
+
+    clean = client.post(f"/api/workspace/{ws_id}/export", json={},
+                        headers=headers(app)).json()
+    assert clean["source_integrity"]["status"] == "unchanged"
+    assert "Source changed" not in (Path(clean["directory"]) / "report.md").read_text(
+        encoding="utf-8")
+
+    main = paper / "main.tex"
+    main.write_text(main.read_text(encoding="utf-8") + "% edited after analysis\n",
+                    encoding="utf-8")
+    drifted = client.post(f"/api/workspace/{ws_id}/export", json={},
+                          headers=headers(app)).json()
+    integrity = drifted["source_integrity"]
+    assert integrity["status"] == "changed"
+    changed = {row["path"]: row["state"] for row in integrity["files"]}
+    assert changed["main.tex"] == "changed"
+    report = (Path(drifted["directory"]) / "report.md").read_text(encoding="utf-8")
+    assert "Source changed after analysis" in report
+    feedback = (Path(drifted["directory"]) / "agent-feedback.json").read_text(encoding="utf-8")
+    assert "re-run the audit" in feedback

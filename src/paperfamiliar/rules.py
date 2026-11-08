@@ -5,6 +5,7 @@ claim is true or whether a paper is any good.
 """
 from __future__ import annotations
 
+import hashlib
 import re
 from dataclasses import dataclass, field
 
@@ -41,19 +42,30 @@ class AuditResult:
 
 
 class _Ids:
-    def __init__(self) -> None:
-        self.counters: dict[str, int] = {}
+    """Content-addressed finding ids.
 
-    def next(self, rule: str) -> str:
-        self.counters[rule] = self.counters.get(rule, 0) + 1
-        return f"F-{rule}-{self.counters[rule]:04d}"
+    The id is derived from the rule, the file and the exact quoted text, so a
+    review decision survives edits that only move a finding (line shifts) but is
+    *not* inherited when the quoted source changes. Ordinal ids used to leak a
+    decision onto a different problem of the same rule after a re-audit.
+    """
+
+    def __init__(self) -> None:
+        self.occurrences: dict[tuple[str, str, str], int] = {}
+
+    def next(self, rule: str, span: SourceSpan) -> str:
+        key = (rule, span.file_path, span.exact_quote)
+        self.occurrences[key] = self.occurrences.get(key, 0) + 1
+        digest = hashlib.sha256("\x00".join(key).encode("utf-8")).hexdigest()[:10]
+        n = self.occurrences[key]
+        return f"F-{rule}-{digest}" + (f"-{n:02d}" if n > 1 else "")
 
 
 def _finding(ids: _Ids, rule: str, *, finding_class: str, status: str, severity: str,
              claim: str, detail: str, span: SourceSpan, refs: list[dict] | None = None,
              scope: str | None = None, model_id: str | None = None) -> Finding:
     return Finding(
-        id=ids.next(rule),
+        id=ids.next(rule, span),
         rule_id=rule,
         finding_class=finding_class,
         evidence_status=status,
