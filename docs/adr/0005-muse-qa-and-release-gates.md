@@ -9,7 +9,7 @@ The acceptance contract requires independent black-box QA and reserves release a
 
 ## Decision
 
-- The real Muse transport is the household task queue at `http://100.111.90.123:9110`, accessed only through `queue_client.py --role producer --producer claude`, with dedicated credentials in `private/credentials.json`. Recipients are `muse-1`, `muse-2`, `muse-3`.
+- The real Muse transport is the household task queue at `http://<queue-host>:9110`, accessed only through `queue_client.py --role producer --producer claude`, with dedicated credentials in `private/credentials.json`. Recipients are `muse-1`, `muse-2`, `muse-3`.
 - Every gate produces `qa/handoff-Gn.json` and must receive `qa/muse-verdict-Gn.json` from Muse on the same commit and run id. Claude never writes a verdict file.
 - `qa/muse-transport.json` records the discovered transport, the probe evidence, and the availability state. If the queue is unreachable, the state is `MUSE_UNAVAILABLE` and gates stay blocked.
 - A failed gate requires a new commit and a full re-run on that commit; old verdicts are not reused.

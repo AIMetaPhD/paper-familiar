@@ -52,8 +52,8 @@ All three Muse agents blocked by their own platform policies; no workaround atte
 ## Not yet done (owner actions only)
 
 - [ ] Owner blind evaluation + `qa/user-acceptance.json` (USER-01)
-- [x] PRIVATE GitHub repo created and pushed: https://github.com/AIMetaPhD/paper-familiar (commit `c391414`, evidence `qa/evidence/push/push-evidence-2026-10-29.json`)
-- [ ] Owner public-visibility authorization (second step)
+- [x] GitHub repo created and pushed: https://github.com/AIMetaPhD/paper-familiar (evidence `qa/evidence/push/push-evidence-2026-10-29.json`)
+- [x] Owner public-visibility authorization and visibility change (2026-11-12, evidence `qa/evidence/publication-2026-11-12.json`)
 - [ ] GitHub Release creation
 - [ ] `AIMetaPhD/AIMetaPhD` README update
 

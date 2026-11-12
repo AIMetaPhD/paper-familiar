@@ -25,7 +25,7 @@
       ],
       "smoke": {
         "ok": true,
-        "module_file": "E:\\ClaudeCodeFiles\\MyProducts\\PaperFamiliar\\paper-familiar\\.venv\\Lib\\site-packages\\papercheck\\__init__.py",
+        "module_file": "<repo>\\.venv\\Lib\\site-packages\\papercheck\\__init__.py",
         "public_names": []
       }
     },
@@ -89,7 +89,7 @@
       "smoke": {
         "ok": true,
         "module": "refchecker",
-        "module_file": "E:\\ClaudeCodeFiles\\MyProducts\\PaperFamiliar\\paper-familiar\\.venv\\Lib\\site-packages\\refchecker\\__init__.py",
+        "module_file": "<repo>\\.venv\\Lib\\site-packages\\refchecker\\__init__.py",
         "public_names": [
           "ArxivReferenceChecker",
           "checkers",
@@ -169,7 +169,7 @@
       ],
       "smoke": {
         "ok": true,
-        "module_file": "E:\\ClaudeCodeFiles\\MyProducts\\PaperFamiliar\\paper-familiar\\.venv\\Lib\\site-packages\\pystylometry\\__init__.py",
+        "module_file": "<repo>\\.venv\\Lib\\site-packages\\pystylometry\\__init__.py",
         "public_names": [
           "AnalysisResult",
           "TokenMetadata",

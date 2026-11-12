@@ -9,7 +9,7 @@ gate QA on 2026-10-29, and the queue server verifies the dispatch signature
 ## Fixed facts
 
 - Repository on the workstation you already SSH into with your normal account:
-  `E:\ClaudeCodeFiles\MyProducts\PaperFamiliar\paper-familiar`
+  `<repo>`
 - Product code commit under test: the exact `commit_sha` field of the handoff
   file named in your queue task (nothing else).
 - Handoff file for your gate: `qa/handoff-G1.json` … `qa/handoff-G5.json`,

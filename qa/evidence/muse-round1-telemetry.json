@@ -78,7 +78,7 @@
         "evidence": {
           "blocked_reasons": [
             "Windows workstation SSH path not available from this Linux VM; no credential supplied and none solicited per muse-2 red line",
-            "Repo path E:\\ClaudeCodeFiles\\MyProducts\\PaperFamiliar\\paper-familiar not mounted or reachable here",
+            "Repo path <repo> not mounted or reachable here",
             "Task permissions=read_only conflicts with required writes to qa/muse-verdict-G2.json and qa/muse-report-G2.md",
             "No handoff file, schema, fixtures or code were attached to the queue task, so no check could be independently reproduced here"
           ],
@@ -108,7 +108,7 @@
           "report_file": null,
           "run_id": "640c1eb30e02",
           "sender": "claude",
-          "summary": "BLOCKED, no checks executed and no verdict/report written: task requires SSH to a Windows workstation and repo path E:\\ClaudeCodeFiles\\MyProducts\\PaperFamiliar\\paper-familiar, which is not reachable from this Linux VM (no E: mount, no Windows SSH channel or credential supplied, and muse-2 must not solicit an SSH private key or use another party's credential); task permissions are read_only, which conflicts with the required writes to qa/muse-verdict-G2.json and qa/muse-report-G2.md, so no files were created or modified and no result was fabricated. Next step for Codex/Claude: either attach the handoff, schema and a repo snapshot at a path reachable by this VM, or run the G2 checks on the Windows side and hand the outputs back for independent review.",
+          "summary": "BLOCKED, no checks executed and no verdict/report written: task requires SSH to a Windows workstation and repo path <repo>, which is not reachable from this Linux VM (no E: mount, no Windows SSH channel or credential supplied, and muse-2 must not solicit an SSH private key or use another party's credential); task permissions are read_only, which conflicts with the required writes to qa/muse-verdict-G2.json and qa/muse-report-G2.md, so no files were created or modified and no result was fabricated. Next step for Codex/Claude: either attach the handoff, schema and a repo snapshot at a path reachable by this VM, or run the G2 checks on the Windows side and hand the outputs back for independent review.",
           "verdict": "BLOCKED",
           "verdict_file": null
         },

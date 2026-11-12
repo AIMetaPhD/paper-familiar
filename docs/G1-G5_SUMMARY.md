@@ -29,7 +29,7 @@ Full verbatim records: `qa/evidence/muse-round1-telemetry.json`, `qa/muse-poll.l
 per-gate `qa/muse-dispatch-G*.json`.
 
 1. **Transport is real and authenticated.** The household queue at
-   `100.111.90.123:9110` accepted Claude's producer token; the server stamped
+   `<queue-host>:9110` accepted Claude's producer token; the server stamped
    `issuer=claude, key_id=claude-producer-v1`. muse-1 completed a short canary
    end-to-end (`PF-ACK-20261028`, `qa/evidence/p0/muse-canary-success.json`).
 2. **Round 1** (3 gates): muse-3 verified provenance server-side but declined

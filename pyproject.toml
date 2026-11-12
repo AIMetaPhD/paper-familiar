@@ -9,7 +9,7 @@ description = "Local-first, evidence-backed LaTeX manuscript verification with a
 readme = "README.md"
 requires-python = ">=3.11,<3.14"
 license = {text = "MIT"}
-authors = [{name = "Xiangchun Chen"}]
+authors = [{name = "AIMetaPhD"}]
 dependencies = [
   "fastapi>=0.115,<1",
   "uvicorn>=0.30,<1",

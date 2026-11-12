@@ -1,0 +1,28 @@
+{
+  "repository": "https://github.com/AIMetaPhD/paper-familiar",
+  "visibility_before": "PRIVATE",
+  "visibility_after": "PUBLIC",
+  "authorized_by": "product owner",
+  "authorization_date": "2026-11-12",
+  "pre_public_checks": {
+    "working_tree_secret_scan": "clean (scripts/secret_scan.py, 320 text files)",
+    "history_credential_scan": "no credential shapes; the only match is the scanner's own regex literal",
+    "commit_email": "GitHub noreply only",
+    "tracked_credential_files": "none (private/credentials.json is not tracked)"
+  },
+  "sanitized_in_latest_tree": [
+    "absolute local repository paths replaced with <repo>",
+    "private queue host replaced with <queue-host>",
+    "author name replaced with the project handle in LICENSE and pyproject.toml",
+    "private chat quote in the push evidence replaced with a neutral statement"
+  ],
+  "history_residual_accepted_by_owner": [
+    "older commits still contain the private queue host, absolute local paths without a username, and the original author name",
+    "the queue host is unroutable outside the owner's private network"
+  ],
+  "not_done": [
+    "no GitHub Release created",
+    "AIMetaPhD profile README not modified",
+    "no git tag created"
+  ]
+}

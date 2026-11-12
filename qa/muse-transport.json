@@ -5,7 +5,7 @@
   "status": "MUSE_UNAVAILABLE",
   "transport": {
     "type": "authenticated_task_queue",
-    "endpoint": "http://100.111.90.123:9110",
+    "endpoint": "http://<queue-host>:9110",
     "network": "Tailscale private address of workstation",
     "client": "F:\\Applications\\Documents\\Workspace\\projects\\muse-queue\\queue_client.py",
     "invocation_template": "python queue_client.py --role producer --producer claude --method GET|POST --path <allowed path>",

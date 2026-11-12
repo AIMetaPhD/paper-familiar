@@ -18,7 +18,8 @@ metadata, and a measured picture of how you write.
 
 **v0.1 technical candidate.** Self-tested end to end on Windows 11 x64; the G1–G5
 acceptance matrix is **not** passed yet: independent Muse QA verdicts and the
-author's own blind sign-off are still outstanding. Nothing is published anywhere.
+author's own blind sign-off are still outstanding. The source is public; there
+is no GitHub Release yet.
 
 | Item | State |
 |---|---|
@@ -30,7 +31,7 @@ author's own blind sign-off are still outstanding. Nothing is published anywhere
 | Author blind evaluation (G5, `USER-01`) | reserved for you |
 | macOS / Linux | `UNTESTED_PLATFORM` — same code path, no host has run it |
 | Real cloud API | `UNTESTED_CLOUD_REAL` — consent flow proven against a mock endpoint |
-| Private repository | pushed to `AIMetaPhD/paper-familiar` (PRIVATE) on 2026-10-29 — public visibility, Release and the AIMetaPhD list remain unauthorized |
+| Repository | [`AIMetaPhD/paper-familiar`](https://github.com/AIMetaPhD/paper-familiar) — public since 2026-11-12; no GitHub Release or AIMetaPhD list entry yet |
 
 Post-freeze fixes (2026-11-09): finding IDs are content-addressed, so a review
 decision can no longer leak onto different text after a re-audit; exports now
