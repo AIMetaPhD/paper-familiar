@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1200px; height: 630px; overflow: hidden; }
+  body {
+    font-family: "Segoe UI", "Inter", -apple-system, sans-serif;
+    background:
+      radial-gradient(900px 500px at 88% -10%, rgba(126, 231, 192, 0.16), transparent 60%),
+      radial-gradient(700px 500px at 5% 110%, rgba(126, 231, 192, 0.08), transparent 55%),
+      #0b1418;
+    color: #eef6f3;
+    position: relative;
+  }
+  .grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(126,231,192,.045) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(126,231,192,.045) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: radial-gradient(900px 600px at 55% 40%, #000 30%, transparent 78%);
+  }
+  .mark {
+    position: absolute; right: 34px; bottom: -92px;
+    font-family: Georgia, serif; font-size: 420px; line-height: 1;
+    color: rgba(126,231,192,.055);
+  }
+  .frame {
+    position: absolute; inset: 28px;
+    border: 1px solid rgba(126,231,192,.18);
+    border-radius: 22px;
+    padding: 40px 46px 30px;
+    display: flex; flex-direction: column;
+  }
+  .top { display: flex; align-items: center; gap: 14px; }
+  .logo {
+    width: 46px; height: 46px; border-radius: 13px;
+    background: #7ee7c0; color: #07110d;
+    font-weight: 800; font-size: 19px; letter-spacing: -.5px;
+    display: grid; place-items: center;
+  }
+  .brand { font-size: 25px; font-weight: 700; letter-spacing: -.3px; }
+  .brand span { color: #7ee7c0; }
+  .spacer { flex: 1; }
+  .badge {
+    font-family: "Cascadia Code", Consolas, monospace;
+    font-size: 12px; letter-spacing: 1.6px; text-transform: uppercase;
+    color: #7ee7c0; border: 1px solid rgba(126,231,192,.35);
+    padding: 7px 11px; border-radius: 999px;
+  }
+  .body { display: flex; gap: 46px; align-items: center; flex: 1; padding-top: 14px; }
+  .left { width: 600px; }
+  h1 {
+    font-size: 64px; line-height: 1.02; letter-spacing: -2.4px; font-weight: 750;
+  }
+  h1 em { font-style: normal; color: #7ee7c0; }
+  .sub {
+    margin-top: 22px; font-size: 20px; line-height: 1.48; color: #a9bdc4; font-weight: 400;
+    max-width: 560px;
+  }
+  .pills { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 26px; }
+  .pill {
+    font-size: 14px; color: #cde7dd; padding: 8px 13px; border-radius: 999px;
+    background: rgba(126,231,192,.08); border: 1px solid rgba(126,231,192,.2);
+  }
+  .card {
+    width: 420px; background: #101c21; border: 1px solid rgba(255,255,255,.09);
+    border-radius: 16px; padding: 22px 24px 20px;
+    box-shadow: 0 30px 70px rgba(0,0,0,.45);
+    transform: rotate(-1.2deg);
+  }
+  .status {
+    font-size: 12px; letter-spacing: 1.8px; text-transform: uppercase;
+    color: #ffb3a4; font-family: "Cascadia Code", Consolas, monospace;
+  }
+  .claim { margin-top: 12px; font-size: 19px; line-height: 1.4; font-weight: 600; }
+  .quote {
+    margin-top: 16px; font-family: "Cascadia Code", Consolas, monospace;
+    font-size: 14px; color: #d9e8e2; background: rgba(255,255,255,.05);
+    border-left: 3px solid #ff9a8a; padding: 11px 13px; border-radius: 6px;
+    overflow: hidden; white-space: nowrap;
+  }
+  .loc {
+    margin-top: 14px; font-family: "Cascadia Code", Consolas, monospace;
+    font-size: 13px; color: #7ee7c0;
+  }
+  .loc span { color: #7f98a1; margin-left: 10px; }
+  .foot {
+    display: flex; align-items: center; gap: 12px;
+    border-top: 1px solid rgba(255,255,255,.08);
+    padding-top: 16px; font-size: 15px; color: #8fa8b0;
+    font-family: "Cascadia Code", Consolas, monospace;
+  }
+  .foot b { color: #dff3ea; font-weight: 600; }
+  .dot { width: 5px; height: 5px; border-radius: 50%; background: #7ee7c0; }
+</style>
+</head>
+<body>
+  <div class="grid"></div>
+  <div class="mark">&ldquo;</div>
+  <div class="frame">
+    <div class="top">
+      <div class="logo">PF</div>
+      <div class="brand">Paper<span>Familiar</span></div>
+      <div class="spacer"></div>
+      <div class="badge">Local-first · v0.1</div>
+    </div>
+    <div class="body">
+      <div class="left">
+        <h1>Verify the research.<br />Preserve the <em>voice</em>.</h1>
+        <p class="sub">
+          A workbench for LaTeX papers. Every finding quotes your exact source bytes.
+          Style feedback learns only from papers you mark as your own.
+        </p>
+        <div class="pills">
+          <div class="pill">Exact-quote evidence</div>
+          <div class="pill">Author style + cognitive map</div>
+          <div class="pill">Runs on 127.0.0.1</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="status">Verified error</div>
+        <div class="claim">This citation key does not occur in any bibliography file.</div>
+        <div class="quote">\cite{missing2026}</div>
+        <div class="loc">main.tex:36:69 <span>exact span</span></div>
+      </div>
+    </div>
+    <div class="foot">
+      <b>github.com/AIMetaPhD/paper-familiar</b>
+      <div class="dot"></div>
+      <span>MIT</span>
+      <div class="dot"></div>
+      <span>no account · no cloud required</span>
+    </div>
+  </div>
+</body>
+</html>
